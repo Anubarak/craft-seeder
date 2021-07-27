@@ -30,11 +30,8 @@ use studioespresso\seeder\services\fields\CkEditor as CkEditorService;
 use studioespresso\seeder\services\fields\Supertable as SupertableService;
 use studioespresso\seeder\services\fields\CTA as CTAService;
 use studioespresso\seeder\services\fields\Positionfieldtype as PositionService;
-
 use Craft;
 use craft\base\Plugin;
-use craft\services\Plugins;
-use craft\events\PluginEvent;
 use craft\console\Application as ConsoleApplication;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;

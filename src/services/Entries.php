@@ -15,8 +15,10 @@ use craft\base\Component;
 use craft\base\Element;
 use craft\elements\Entry;
 use craft\elements\User;
+use craft\helpers\Json;
 use studioespresso\seeder\Seeder;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 
 /**
  * SeederService Service
@@ -44,7 +46,7 @@ class Entries extends Component
      * @throws \yii\base\InvalidConfigException
      * @throws \Throwable
      */
-    public function generate($section = null, $count = 20)
+    public function generate($section = null, $count = 20, $site = null)
     {
         if (ctype_digit($section)) {
             $section = Craft::$app->sections->getSectionById((int)$section);
@@ -55,6 +57,14 @@ class Entries extends Component
         if (!$section) {
             echo "Section not found\n";
             return false;
+        }
+
+        if($site && is_string($site)){
+            $site = Craft::$app->getSites()->getSiteByHandle($site);
+        }
+
+        if($site === null){
+            $site = Craft::$app->getSites()->getPrimarySite();
         }
 
         $entryTypes = $section->getEntryTypes();
@@ -73,6 +83,7 @@ class Entries extends Component
                     'sectionId' => (int)$section->id,
                     'typeId' => $entryType->id,
                     'title' => Seeder::$plugin->fields->Title(),
+                    'siteId' => $site->id,
                 ]);
                 $entry->authorId = $admin->id;
                 Craft::$app->getElements()->saveElement($entry);
@@ -80,7 +91,10 @@ class Entries extends Component
                 $entry->setScenario(Element::SCENARIO_LIVE);
                 if($entryType->fieldLayoutId) {
                     $entry = Seeder::$plugin->seeder->populateFields($typeFields, $entry);
-                    Craft::$app->getElements()->saveElement($entry);
+                    if(!Craft::$app->getElements()->saveElement($entry)){
+                        Console::error(VarDumper::dumpAsString($entry->getErrors()));
+                        Craft::$app->getElements()->deleteElement($entry);
+                    }
                 }
             }
         }

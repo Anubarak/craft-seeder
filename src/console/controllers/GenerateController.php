@@ -54,6 +54,8 @@ class GenerateController extends Controller
      */
     public $count = 20;
 
+    public $site = null;
+
     // Public Methods
     // =========================================================================
 
@@ -61,9 +63,9 @@ class GenerateController extends Controller
     public function options($actionId){
         switch ($actionId) {
             case 'entries':
-                return ['section','count'];
+                return ['section','count', 'site'];
             case 'categories':
-                return ['group','count'];
+                return ['group','count', 'site'];
             case 'users':
                 return ['group','count'];
         }
@@ -88,7 +90,7 @@ class GenerateController extends Controller
             return;
         }
 
-        $result = Seeder::$plugin->entries->generate($this->section, $this->count);
+        $result = Seeder::$plugin->entries->generate($this->section, $this->count, $this->site);
         return $result;
     }
 

@@ -21,6 +21,7 @@ use craft\fields\Email;
 use craft\fields\Entries;
 use craft\fields\Lightswitch;
 use craft\fields\MultiSelect;
+use craft\fields\Number;
 use craft\fields\PlainText;
 use craft\fields\RadioButtons;
 use craft\fields\Table;
@@ -57,7 +58,9 @@ class RegisterFieldTypeEvent extends Event
         $this->types[MultiSelect::class] = [$fieldsService, 'MultiSelect'];
         $this->types[Table::class] = [$fieldsService, 'Table'];
         $this->types[Tags::class] = [$fieldsService, 'Tags'];
-        $this->types[Assets::class] = [$fieldsService, 'Assets'];
         $this->types[Entries::class] = [$fieldsService, 'Entries'];
-        $this->types['craft\\redactor\\Field'] = [Seeder::$plugin->redactor, 'Field'];    }
+        $this->types[Assets::class] = [$fieldsService, 'Assets'];
+        $this->types[Number::class] = [$fieldsService, 'Number'];
+        $this->types['craft\\redactor\\Field'] = [Seeder::$plugin->redactor, 'Field'];
+    }
 }

@@ -30,6 +30,7 @@ use craft\fields\Entries;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
 use craft\fields\MultiSelect;
+use craft\fields\Number;
 use craft\fields\PlainText;
 use craft\fields\RadioButtons;
 use craft\fields\Table;
@@ -182,6 +183,37 @@ class Fields extends Component
     }
 
     /**
+     * checkForEvent
+     *
+     * @param \craft\base\Field            $field
+     * @param \craft\base\ElementInterface $element
+     *
+     * @return mixed|string|null
+     *
+     * @author Robin Schambach
+     * @since  22.06.2021
+     * @throws \yii\base\NotSupportedException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function checkForEvent(Field $field, ElementInterface $element)
+    {
+        $settings = $this->getSettings($field, $element);
+        if($settings !== null){
+            if(is_callable($settings) === true){
+                return $settings($field, $element);
+            }
+
+            $value = $this->getCallBack($settings);
+
+            if($value !== 'no-value'){
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @param PlainText $field
      * @param Entry     $entry
      *
@@ -191,19 +223,9 @@ class Fields extends Component
      */
     public function PlainText($field, $entry)
     {
-
-        $settings = $this->getSettings($field, $entry);
-        if($settings !== null){
-            if(is_callable($settings) === true){
-                return $settings($field, $entry);
-            }
-
-            $value = $this->getCallBack($settings);
-
-            if($value !== 'no-value'){
-                return $value;
-            }
-
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
         }
 
         return $this->factory->realText($field->charLimit ? $field->charLimit : 200);
@@ -216,6 +238,10 @@ class Fields extends Component
      */
     public function Email($field, $entry)
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
         return $this->factory->email();
     }
 
@@ -227,19 +253,42 @@ class Fields extends Component
      */
     public function Url($field, $entry)
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
         return $this->factory->url();
+    }
+
+    public function Number(Number $field, $entry)
+    {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+        $min = $field->min ?? 0;
+        $max = $field->max ?? 100;
+
+        return random_int($min, $max);
     }
 
     public function Color($field, $entry)
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
         return $this->factory->safeHexColor;
 
     }
 
     public function Date($field, $entry)
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
         return $this->factory->dateTime();
-
     }
 
     /**
@@ -251,6 +300,11 @@ class Fields extends Component
      */
     public function Categories($field, $entry): array
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         $source = $field->source;
         $groupId = null;
         if($source){
@@ -275,6 +329,11 @@ class Fields extends Component
      */
     public function Dropdown($field, $entry)
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         return $field->options[array_rand($field->options)]['value'];
     }
 
@@ -287,6 +346,11 @@ class Fields extends Component
      */
     public function Checkboxes($field, $entry): array
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         $checkedBoxes = [];
         for ($x = 1, $xMax = random_int(1, count($field->options)); $x <= $xMax; $x++) {
             $checkedBoxes[] = $field->options[array_rand($field->options)]['value'];
@@ -302,6 +366,11 @@ class Fields extends Component
      */
     public function RadioButtons($field, $entry)
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         return $field->options[array_rand($field->options)]['value'];
     }
 
@@ -314,6 +383,11 @@ class Fields extends Component
      */
     public function MultiSelect($field, $entry): array
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         $options = [];
         for ($x = 1, $xMax = random_int(1, count($field->options)); $x <= $xMax; $x++) {
             $options[] = $field->options[array_rand($field->options)]['value'];
@@ -329,6 +403,11 @@ class Fields extends Component
      */
     public function Lightswitch($field, $entry): bool
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         return $this->factory->boolean;
     }
 
@@ -341,6 +420,11 @@ class Fields extends Component
      */
     public function Table($field, $entry): array
     {
+
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
 
         if ($field->minRows) {
             $min = $field->minRows;
@@ -392,10 +476,17 @@ class Fields extends Component
      * @param Entry $entry
      *
      * @return array
-     * @throws \Exception
+     * @throws \craft\errors\ElementNotFoundException
+     * @throws \yii\base\Exception
+     * @throws \Throwable
      */
     public function Tags($field, $entry): array
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         return Tag::find()->limit(random_int(1, 5))->orderBy('rand()')->ids();
     }
 
@@ -411,6 +502,61 @@ class Fields extends Component
     }
 
     /**
+     * Assets
+     *
+     * @param \craft\fields\Assets $field
+     *
+     * @return array
+     *
+     * @author Robin Schambach
+     * @since  04.12.2020
+     * @throws \Exception
+     */
+    public function Assets(\craft\fields\Assets $field, ElementInterface $element): array
+    {
+        $callbackValue = $this->checkForEvent($field, $element);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
+        $source = $field->sources;
+        $volumeIds = [];
+        if($source !== '*'){
+
+            if(!is_array($source)){
+                $source = [$source];
+            }
+
+            foreach ($source as $s){
+                $volumeUid = str_replace('folder:', '', $s);
+                $volumeIds[] = Db::idByUid(\craft\db\Table::VOLUMES, $volumeUid);
+            }
+
+        }
+
+        $limit = 2;
+        if($field->limit){
+            $limit = $field->limit;
+        }
+
+
+        $query = Asset::find()
+            ->limit(random_int(1, $limit))
+            ->orderBy(new Expression('rand()'));
+        if($volumeIds){
+            $query->volumeId($volumeIds);
+        }
+
+        if($field->allowedKinds){
+            $query->kind($field->allowedKinds);
+        }
+
+        $assetIds = $query->ids();
+
+        return $assetIds;
+    }
+
+    /**
      * @param Entries $field
      *
      * @param         $entry
@@ -420,6 +566,11 @@ class Fields extends Component
      */
     public function Entries(Entries $field, $entry): array
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         $sources = $field->sources;
         $sectionIds = [];
         foreach ($sources as $source) {
@@ -432,49 +583,21 @@ class Fields extends Component
             $limit = $field->limit;
         }
 
-        $entryIds = Entry::find()
+        $query = Entry::find()
             ->sectionId($sectionIds)
-            ->limit(random_int(0, $limit))
-            ->orderBy(new Expression('rand()'))
-            ->ids();
-
-        return $entryIds;
-    }
-
-    /**
-     * Assets
-     *
-     * @param \craft\fields\Assets $field
-     *
-     * @return array
-     *
-     * @author Robin Schambach
-     * @since  04.12.2020
-     * @throws \Exception
-     */
-    public function Assets(\craft\fields\Assets $field): array
-    {
-        $source = $field->sources;
-        $volumeIds = [];
-        if($source !== '*'){
-            $volumeUid = str_replace('folder:', '', $source);
-            $volumeIds[] = Db::idByUid(\craft\db\Table::VOLUMES, $volumeUid);
-        }
-
-        $limit = 2;
-        if($field->limit){
-            $limit = $field->limit;
-        }
-
-        $query = Asset::find()
             ->limit(random_int(1, $limit))
             ->orderBy(new Expression('rand()'));
-        if($volumeIds){
-            $query->volumeId($volumeIds);
-        }
-        $assetIds = $query->ids();
 
-        return $assetIds;
+        if($field->targetSiteId){
+            $site = Craft::$app->getSites()->getSiteByUid($field->targetSiteId);
+            $query->siteId($site->id);
+        }elseif ($entry->siteId){
+            $query->siteId($entry->siteId);
+        }
+
+        $entryIds = $query->ids();
+
+        return $entryIds;
     }
 
     /**
@@ -486,15 +609,20 @@ class Fields extends Component
      * @throws \yii\base\Exception
      * @throws \yii\base\ExitException
      */
-    public function Matrix($field, $entry): void
+    public function Matrix($field, $entry)
     {
+        $callbackValue = $this->checkForEvent($field, $entry);
+        if($callbackValue){
+            return $callbackValue;
+        }
+
         $types = $field->getBlockTypes();
 
         $blockIds = [];
         $types = array_map(
             static function ($type) {
-            return $type->id;
-        }, $types);
+                return $type->id;
+            }, $types);
 
         if (Seeder::getInstance()->getSettings()->eachMatrixBlock) {
             $blockCount = count($types);
