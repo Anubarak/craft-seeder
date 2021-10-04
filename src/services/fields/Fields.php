@@ -14,6 +14,7 @@ use Craft;
 use craft\base\Component;
 use craft\base\ElementInterface;
 use craft\base\Field;
+use craft\base\FieldInterface;
 use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
@@ -121,7 +122,6 @@ class Fields extends Component
     /**
      * getCallBack
      *
-     * @param        $settings
      * @param null   $class
      *
      * @return mixed|null
@@ -129,12 +129,12 @@ class Fields extends Component
      * @author Robin Schambach
      * @since  06.09.2019
      */
-    public function getCallBack($settings, $class = null)
+    public function getCallBack($settings, FieldInterface $field, ElementInterface $element, $class = null)
     {
         // just a string, no options, no class
         if(is_string($settings)){
             $class = $class ?? $this->factory;
-            return call_user_func([$class, $settings]);
+            return $class->$settings($field, $element);
         }
 
         if(is_array($settings) === true){
@@ -157,7 +157,7 @@ class Fields extends Component
             if(count($settings) === 2 && is_object($settings[0])){
                 // return call_user_func($settings);
                 // PHPstorm says this... need trying ¯\_(ツ)_/¯
-                return $settings();
+                return $settings($field, $element);
             }
         }
 
@@ -203,7 +203,7 @@ class Fields extends Component
                 return $settings($field, $element);
             }
 
-            $value = $this->getCallBack($settings);
+            $value = $this->getCallBack($settings, $field, $element);
 
             if($value !== 'no-value'){
                 return $value;

@@ -55,13 +55,12 @@ class SeederService extends Component
      */
     public function populateFields($fields, ElementInterface $element): ElementInterface
     {
-        $entryFields = [];
         foreach ($fields as $field) {
             try {
                 $fieldData = $this->getFieldData($field, $element);
                 if ($fieldData) {
-                    $entryFields[$field['handle']] = $fieldData;//Seeder::$plugin->$fieldProvider->$fieldType($field, $entry);
-                }
+                    $element->setFieldValue($field->handle, $fieldData);
+                   }
             } catch (FieldNotFoundException $e) {
                 if (Seeder::$plugin->getSettings()->debug) {
                     Craft::dd($e);
@@ -70,7 +69,6 @@ class SeederService extends Component
                 }
             }
         }
-        $element->setFieldValues($entryFields);
 
         return $element;
     }
@@ -159,6 +157,17 @@ class SeederService extends Component
 
         if (isset($registeredFieldTypes[$class])) {
             return call_user_func($registeredFieldTypes[$class], $field, $element);
+        }
+
+        // last chance, try to find a valid callback
+        foreach ($registeredFieldTypes as $fieldType){
+
+            if(is_string($fieldType) && $class === $fieldType){
+                $v = Seeder::$plugin->fields->checkForEvent($field, $element);
+                if($v){
+                    return $v;
+                }
+            }
         }
 
         throw new FieldNotFoundException('the field ' . $class . ' could not be found');
