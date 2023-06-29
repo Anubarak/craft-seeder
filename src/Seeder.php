@@ -86,7 +86,11 @@ class Seeder extends Plugin
      *
      * @var string
      */
-    public $schemaVersion = '1.0.0';
+    public string $schemaVersion = '1.0.0';
+
+    public bool $hasCpSettings = false;
+
+    public bool $hasCpSection = true;
 
     // Public Methods
     // =========================================================================
