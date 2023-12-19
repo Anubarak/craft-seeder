@@ -1,36 +1,32 @@
 <?php
 /**
- * Seeder plugin for Craft CMS 3.x
+ * Craft CMS Plugins
  *
- * Entries seeder for Craft CMS
+ * Created with PhpStorm.
  *
- * @link      https://studioespresso.co
- * @copyright Copyright (c) 2018 Studio Espresso
+ * @link      https://github.com/Anubarak/
+ * @email     anubarak1993@gmail.com
+ * @copyright Copyright (c) 2023 Robin Schambach|Secondred Newmedia GmbH
  */
 
 namespace anubarak\seeder\services\fields;
-
-use craft\base\Component;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
-use Faker\Factory;
-use Faker\Provider\Base;
-use Faker\Provider\Lorem;
 
 /**
- * Class Redactor
+ * Class Lightswitch
  *
  * @package anubarak\seeder\services\fields
  * @since   19/12/2023
  * @author  by Robin Schambach
  */
-class Redactor extends BaseField
+class Lightswitch extends BaseField
 {
     /**
      * @inheritDoc
      */
     public function generate(FieldInterface $field, ElementInterface $element)
     {
-        return Lorem::sentences(rand(5, 20), true);
+        return $this->factory->boolean;
     }
 }

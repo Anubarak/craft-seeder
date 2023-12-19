@@ -1,6 +1,6 @@
 <?php
 
-namespace studioespresso\seeder\records;
+namespace anubarak\seeder\records;
 
 use craft\db\ActiveRecord;
 

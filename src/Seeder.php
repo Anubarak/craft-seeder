@@ -1,54 +1,36 @@
 <?php
-/**
- * Seeder plugin for Craft CMS 3.x
- *
- * Entries seeder for Craft CMS
- *
- * @link      https://studioespresso.co
- * @copyright Copyright (c) 2018 Studio Espresso
- */
 
-namespace studioespresso\seeder;
 
-use studioespresso\seeder\models\Settings;
-use studioespresso\seeder\services\Categories;
-use studioespresso\seeder\services\Entries;
-use studioespresso\seeder\services\fields\CkEditor;
-use studioespresso\seeder\services\fields\CTA;
-use studioespresso\seeder\services\fields\Fields;
-use studioespresso\seeder\services\fields\Redactor;
-use studioespresso\seeder\services\fields\Supertable;
-use studioespresso\seeder\services\SeederService;
-use studioespresso\seeder\services\Entries as EntriesService;
-use studioespresso\seeder\services\Categories as CategoriesService;
-use studioespresso\seeder\services\Users;
-use studioespresso\seeder\services\Weeder as WeederService;
-use studioespresso\seeder\services\Users as UsersService;
-use studioespresso\seeder\services\fields\Fields as FieldsService;
-use studioespresso\seeder\services\fields\Redactor as RedactorService;
-use studioespresso\seeder\services\fields\CkEditor as CkEditorService;
-use studioespresso\seeder\services\fields\Supertable as SupertableService;
-use studioespresso\seeder\services\fields\CTA as CTAService;
-use studioespresso\seeder\services\fields\Positionfieldtype as PositionService;
-use Craft;
+namespace anubarak\seeder;
+
+use anubarak\seeder\models\Settings;
+use anubarak\seeder\services\Categories;
+use anubarak\seeder\services\Entries;
+use anubarak\seeder\services\fields\CkEditor;
+use anubarak\seeder\services\fields\CTA;
+use anubarak\seeder\services\fields\Fields;
+use anubarak\seeder\services\fields\Redactor;
+use anubarak\seeder\services\fields\Supertable;
+use anubarak\seeder\services\SeederService;
+use anubarak\seeder\services\Entries as EntriesService;
+use anubarak\seeder\services\Categories as CategoriesService;
+use anubarak\seeder\services\Users;
+use anubarak\seeder\services\Weeder as WeederService;
+use anubarak\seeder\services\Users as UsersService;
+use anubarak\seeder\services\fields\Fields as FieldsService;
+use anubarak\seeder\services\fields\Redactor as RedactorService;
+use anubarak\seeder\services\fields\CkEditor as CkEditorService;
+use anubarak\seeder\services\fields\Supertable as SupertableService;
+use anubarak\seeder\services\fields\CTA as CTAService;
+use anubarak\seeder\services\fields\Positionfieldtype as PositionService;
 use craft\base\Plugin;
-use craft\console\Application as ConsoleApplication;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
 
 use yii\base\Event;
 
 /**
- * Craft plugins are very much like little applications in and of themselves. We’ve made
- * it as simple as we can, but the training wheels are off. A little prior knowledge is
- * going to be required to write a plugin.
  *
- * For the purposes of the plugin docs, we’re going to assume that you know PHP and SQL,
- * as well as some semi-advanced concepts like object-oriented programming and PHP namespaces.
- *
- * https://craftcms.com/docs/plugins/introduction
- *
- * @author    Studio Espresso
  * @package   Seeder
  * @since     1.0.0
  * @property  SeederService seeder
@@ -76,7 +58,7 @@ class Seeder extends Plugin
      *
      * @var Seeder
      */
-    public static $plugin;
+    public static Seeder $plugin;
 
     // Public Properties
     // =========================================================================
@@ -87,9 +69,14 @@ class Seeder extends Plugin
      * @var string
      */
     public string $schemaVersion = '1.0.0';
-
+    /**
+     * @inheritdoc
+     */
     public bool $hasCpSettings = false;
 
+    /**
+     * @inheritdoc
+     */
     public bool $hasCpSection = true;
 
     // Public Methods
@@ -105,13 +92,11 @@ class Seeder extends Plugin
             'seeder'            => SeederService::class,
             'weeder'            => WeederService::class,
             'entries'           => Entries::class,
-            'categories'        => Categories::class,
             'users'             => Users::class,
             'fields'            => Fields::class,
             'redactor'          => Redactor::class,
             'ckeditor'          => CkEditor::class,
             'supertable'        => Supertable::class,
-            'cta'               => CTA::class,
             'positionfieldtype' => PositionService::class,
         ];
 
@@ -119,14 +104,9 @@ class Seeder extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             static function (RegisterUrlRulesEvent $event) {
-                $event->rules['seeder'] = 'seeder/seeder/index';
+                $event->rules['seeder'] = 'element-seeder/seeder/index';
             }
         );
-
-        // Add in our console commands
-        if (Craft::$app instanceof ConsoleApplication) {
-            $this->controllerNamespace = 'studioespresso\seeder\console\controllers';
-        }
     }
 
     // Protected Methods
@@ -135,7 +115,7 @@ class Seeder extends Plugin
     /**
      * Creates and returns the model used to store the plugin’s settings.
      *
-     * @return \studioespresso\seeder\models\Settings
+     * @return Settings
      */
     protected function createSettingsModel(): Settings
     {

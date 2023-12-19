@@ -21,10 +21,10 @@
 {% set pluginCpUrl = url('seeder') %}
 
 {% set content %}
-    <form method="post" action="{{ actionUrl('seeder/seeder/clean') }}">
+    <form method="post" action="{{ actionUrl('element-seeder/seeder/clean') }}">
         {% if data|length %}
         {{ csrfInput() }}
-        {{ redirectInput('seeder') }}
+        {{ redirectInput('element-seeder') }}
         Select the seeded entries you want to remove
 
 

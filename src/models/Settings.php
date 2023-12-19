@@ -8,9 +8,9 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace studioespresso\seeder\models;
+namespace anubarak\seeder\models;
 
-use craft\base\Model;
+use craft\config\BaseConfig;
 
 /**
  * Seeder Settings Model
@@ -26,7 +26,7 @@ use craft\base\Model;
  * @package   Seeder
  * @since     1.0.0
  */
-class Settings extends Model
+class Settings extends BaseConfig
 {
     // Public Properties
     // =========================================================================

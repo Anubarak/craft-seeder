@@ -8,18 +8,35 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace studioespresso\seeder\services;
+namespace anubarak\seeder\services;
 
+use anubarak\seeder\services\fields\BaseField;
+use anubarak\seeder\services\fields\Redactor;
 use Craft;
 use craft\base\Component;
 use craft\base\ElementInterface;
+use craft\base\FieldInterface;
+use craft\elements\Entry;
 use craft\errors\FieldNotFoundException;
-use studioespresso\seeder\events\RegisterFieldTypeEvent;
-use studioespresso\seeder\records\SeederAssetRecord;
-use studioespresso\seeder\records\SeederCategoryRecord;
-use studioespresso\seeder\records\SeederEntryRecord;
-use studioespresso\seeder\records\SeederUserRecord;
-use studioespresso\seeder\Seeder;
+use anubarak\seeder\events\RegisterFieldTypeEvent;
+use anubarak\seeder\records\SeederAssetRecord;
+use anubarak\seeder\records\SeederEntryRecord;
+use anubarak\seeder\records\SeederUserRecord;
+use anubarak\seeder\Seeder;
+use craft\fields\Assets;
+use craft\fields\Checkboxes;
+use craft\fields\Color;
+use craft\fields\Date;
+use craft\fields\Dropdown;
+use craft\fields\Email;
+use craft\fields\Lightswitch;
+use craft\fields\MultiSelect;
+use craft\fields\Number;
+use craft\fields\PlainText;
+use craft\fields\RadioButtons;
+use craft\fields\Table;
+use craft\fields\Url;
+use Faker\Generator;
 
 /**
  * SeederService Service
@@ -42,25 +59,53 @@ class SeederService extends Component
     /**
      * All registered Field Types
      *
-     * @var array $_registeredFieldTypes
+     * @var array|null $registeredFieldTypes
      */
-    private $_registeredFieldTypes;
+    protected ?array $registeredFieldTypes = null;
+    /**
+     * @var \anubarak\seeder\services\fields\BaseField[] $fieldInstances
+     */
+    protected array $fieldInstances = [];
+    /**
+     * @var \Faker\Generator $factory
+     */
+    public Generator $factory;
 
     /**
-     * @param                  $fields
+     * @param array $config
+     */
+    public function __construct(array $config = [])
+    {
+        $language = Seeder::$plugin->getSettings()->fakerProvider;
+        $this->factory = \Faker\Factory::create($language);
+
+        parent::__construct($config);
+    }
+
+    /**
      * @param ElementInterface $element
      *
      * @return \craft\base\ElementInterface
      * @throws \yii\base\ExitException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      */
-    public function populateFields($fields, ElementInterface $element): ElementInterface
+    public function populateFields(ElementInterface $element): ElementInterface
     {
+        $layout = $element->getFieldLayout();
+        // no layout -> nothing we can do ¯\_(ツ)_/¯
+        if (!$layout) {
+            return $element;
+        }
+
+        $fields = $layout->getCustomFields();
+
         foreach ($fields as $field) {
             try {
                 $fieldData = $this->getFieldData($field, $element);
                 if ($fieldData) {
                     $element->setFieldValue($field->handle, $fieldData);
-                   }
+                }
             } catch (FieldNotFoundException $e) {
                 if (Seeder::$plugin->getSettings()->debug) {
                     Craft::dd($e);
@@ -76,7 +121,7 @@ class SeederService extends Component
     /**
      * @param \craft\elements\Entry $entry
      */
-    public function saveSeededEntry($entry): void
+    public function saveSeededEntry(Entry $entry): void
     {
         $record = new SeederEntryRecord();
         $record->entryUid = $entry->uid;
@@ -105,17 +150,6 @@ class SeederService extends Component
     }
 
     /**
-     * @param \craft\elements\Category $category
-     */
-    public function saveSeededCategory($category): void
-    {
-        $record = new SeederCategoryRecord();
-        $record->section = $category->groupId;
-        $record->categoryUid = $category->uid;
-        $record->save();
-    }
-
-    /**
      * Get all registered field Types
      *
      * @return array
@@ -125,51 +159,94 @@ class SeederService extends Component
      */
     public function getRegisteredFieldTypes(): array
     {
-        if ($this->_registeredFieldTypes === null) {
-            $event = new RegisterFieldTypeEvent();
+        if ($this->registeredFieldTypes === null) {
+            $event = new RegisterFieldTypeEvent([
+                Dropdown::class          => \anubarak\seeder\services\fields\Dropdown::class,
+                Lightswitch::class       => \anubarak\seeder\services\fields\Lightswitch::class,
+                Date::class              => \anubarak\seeder\services\fields\Date::class,
+                PlainText::class         => \anubarak\seeder\services\fields\PlainText::class,
+                Email::class             => \anubarak\seeder\services\fields\Email::class,
+                Url::class               => \anubarak\seeder\services\fields\Url::class,
+                Color::class             => \anubarak\seeder\services\fields\Color::class,
+                Checkboxes::class        => \anubarak\seeder\services\fields\Checkboxes::class,
+                RadioButtons::class      => \anubarak\seeder\services\fields\RadioButtons::class,
+                MultiSelect::class       => \anubarak\seeder\services\fields\MultiSelect::class,
+                Table::class             => \anubarak\seeder\services\fields\Table::class,
+                Entries::class           => \anubarak\seeder\services\fields\Entries::class,
+                Assets::class            => \anubarak\seeder\services\fields\Assets::class,
+                Number::class            => \anubarak\seeder\services\fields\Number::class,
+                'craft\\redactor\\Field' => Redactor::class,
+            ]);
             if ($this->hasEventHandlers(self::REGISTER_FIELD_TYPES)) {
                 $this->trigger(self::REGISTER_FIELD_TYPES, $event);
             }
 
-            $this->_registeredFieldTypes = $event->types;
+            $this->registeredFieldTypes = $event->types;
         }
 
-        return $this->_registeredFieldTypes;
+        return $this->registeredFieldTypes;
     }
 
     /**
      * Get the Field Data
      *
-     * @param                              $field
-     *
+     * @param \craft\base\FieldInterface   $field
      * @param \craft\base\ElementInterface $element
      *
      * @return mixed
      *
      * @throws \craft\errors\FieldNotFoundException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      * @author Robin Schambach
      * @since  05.09.2019
      */
-    public function getFieldData($field, ElementInterface $element)
+    public function getFieldData(FieldInterface $field, ElementInterface $element): mixed
     {
         $class = get_class($field);
         $registeredFieldTypes = $this->getRegisteredFieldTypes();
 
         if (isset($registeredFieldTypes[$class])) {
-            return call_user_func($registeredFieldTypes[$class], $field, $element);
+            $fieldClass = $this->getFieldInstance($class);
+
+            return $fieldClass->run($field, $element);
         }
 
         // last chance, try to find a valid callback
-        foreach ($registeredFieldTypes as $fieldType){
-
-            if(is_string($fieldType) && $class === $fieldType){
+        foreach ($registeredFieldTypes as $fieldType) {
+            if (is_string($fieldType) && $class === $fieldType) {
                 $v = Seeder::$plugin->fields->checkForEvent($field, $element);
-                if($v){
+                if ($v) {
                     return $v;
                 }
             }
         }
 
         throw new FieldNotFoundException('the field ' . $class . ' could not be found');
+    }
+
+    /**
+     * getFieldInstance
+     *
+     * @param string $class
+     *
+     * @return \anubarak\seeder\services\fields\BaseField
+     * @throws \yii\base\InvalidConfigException
+     * @author Robin Schambach
+     * @since  19/12/2023
+     */
+    public function getFieldInstance(string $class): BaseField
+    {
+        if (!isset($this->fieldInstances[$class])) {
+            $object = Craft::createObject([
+                'class'         => $class,
+                '__construct()' => [
+                    'factory' => $this->factory
+                ]
+            ]);
+            $this->fieldInstances[$class] = $object;
+        }
+
+        return $this->fieldInstances[$class];
     }
 }

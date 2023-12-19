@@ -1,46 +1,45 @@
 <?php
 /**
- * Seeder plugin for Craft CMS 3.x
+ * Craft CMS Plugins
  *
- * Entries seeder for Craft CMS
+ * Created with PhpStorm.
  *
- * @link      https://studioespresso.co
- * @copyright Copyright (c) 2018 Studio Espresso
+ * @link      https://github.com/Anubarak/
+ * @email     anubarak1993@gmail.com
+ * @copyright Copyright (c) 2023 Robin Schambach|Secondred Newmedia GmbH
  */
 
 namespace anubarak\seeder\services\fields;
 
-use craft\base\Component;
+use anubarak\seeder\Seeder;
 use craft\base\ElementInterface;
-use craft\base\Field;
 use craft\base\FieldInterface;
 use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\elements\Tag;
 use craft\elements\User;
-use anubarak\seeder\Seeder;
 use yii\base\NotSupportedException;
 
 /**
- * Fields Service
+ * Class BaseField
  *
- * @author    Studio Espresso
- * @package   Seeder
- * @since     1.0.0
+ * @package anubarak\seeder\services\fields
+ * @since   19/12/2023
+ * @author  by Robin Schambach
  */
-class Fields extends Component
+abstract class BaseField
 {
     /**
-     * @var \Faker\Generator $factory
+     * @var \Faker\Generator
      */
     public \Faker\Generator $factory;
 
-    public function __construct()
+    /**
+     * @param \Faker\Generator $factory
+     */
+    public function __construct(\Faker\Generator $factory)
     {
-        parent::__construct();
-        $settings = Seeder::$plugin->getSettings()->fakerProvider;
-        $this->factory = \Faker\Factory::create($settings);
-
+        $this->factory = $factory;
     }
 
     /**
@@ -56,18 +55,19 @@ class Fields extends Component
      * @author Robin Schambach
      * @since  06.09.2019
      */
-    public function getSettings(Field $field, ElementInterface $element)
+    public function getSettings(FieldInterface $field, ElementInterface $element)
     {
         $settings = Seeder::$plugin->getSettings()->fieldsConfig;
 
+        // TODO refactor
         $index = get_class($element);
         $settingsForElement = null;
-        if(isset($settings[$index])){
-            switch ($index){
+        if (isset($settings[$index])) {
+            switch ($index) {
                 case Entry::class:
                     /** @var Entry $element */
                     $section = $element->getSection();
-                    if(isset($settings[$index][$section->handle])){
+                    if (isset($settings[$index][$section->handle])) {
                         $settingsForElement = $settings[$index][$section->handle];
                     }
                     break;
@@ -83,7 +83,7 @@ class Fields extends Component
             }
         }
 
-        if(($settingsForElement !== null) && isset($settingsForElement[$field->handle])) {
+        if (($settingsForElement !== null) && isset($settingsForElement[$field->handle])) {
             return $settingsForElement[$field->handle];
         }
 
@@ -93,7 +93,7 @@ class Fields extends Component
     /**
      * getCallBack
      *
-     * @param null   $class
+     * @param null $class
      *
      * @return mixed|null
      *
@@ -103,12 +103,13 @@ class Fields extends Component
     public function getCallBack($settings, FieldInterface $field, ElementInterface $element, $class = null)
     {
         // just a string, no options, no class
-        if(is_string($settings)){
+        if (is_string($settings)) {
             $class = $class ?? $this->factory;
+
             return $class->$settings($field, $element);
         }
 
-        if(is_array($settings) === true){
+        if (is_array($settings) === true) {
             // check if it's a custom class ¯\_(ツ)_/¯
 
             /// format
@@ -116,7 +117,7 @@ class Fields extends Component
             ///     [class, 'function'],
             ///     [setting1, setting2]
             /// ]
-            if(count($settings) === 2 && is_array($settings[0])){
+            if (count($settings) === 2 && is_array($settings[0])) {
                 return call_user_func_array($settings[0], $settings[1]);
             }
 
@@ -125,7 +126,7 @@ class Fields extends Component
             /// [
             ///     [class, 'function']
             /// ]
-            if(count($settings) === 2 && is_object($settings[0])){
+            if (count($settings) === 2 && is_object($settings[0])) {
                 // return call_user_func($settings);
                 // PHPstorm says this... need trying ¯\_(ツ)_/¯
                 return $settings($field, $element);
@@ -136,24 +137,6 @@ class Fields extends Component
     }
 
     /**
-     * Title
-     *
-     * @param int $maxLength
-     *
-     * @return bool|string
-     *
-     * @author Robin Schambach
-     * @since  06.09.2019
-     * @throws \Exception
-     */
-    public function Title($maxLength = 40)
-    {
-        $title = $this->factory->text(random_int(8, $maxLength));
-        $title = substr($title, 0, strlen($title) - 1);
-        return $title;
-    }
-
-    /**
      * checkForEvent
      *
      * @param \craft\base\Field            $field
@@ -161,26 +144,47 @@ class Fields extends Component
      *
      * @return mixed|string|null
      *
-     * @author Robin Schambach
-     * @since  22.06.2021
      * @throws \yii\base\NotSupportedException
      * @throws \yii\base\InvalidConfigException
+     * @author Robin Schambach
+     * @since  22.06.2021
      */
     public function checkForEvent(FieldInterface $field, ElementInterface $element): mixed
     {
-        $settings = $this->getSettings($field, $element);
-        if($settings !== null){
-            if(is_callable($settings) === true){
-                return $settings($field, $element);
-            }
+        return Seeder::$plugin->fields->checkForEvent($field, $element);
+    }
 
-            $value = $this->getCallBack($settings, $field, $element);
-
-            if($value !== 'no-value'){
-                return $value;
-            }
+    /**
+     * run
+     *
+     * @param \craft\base\FieldInterface   $field
+     * @param \craft\base\ElementInterface $element
+     *
+     * @return mixed|string
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
+     * @author Robin Schambach
+     * @since  19/12/2023
+     */
+    public function run(FieldInterface $field, ElementInterface $element)
+    {
+        $callbackValue = $this->checkForEvent($field, $element);
+        if ($callbackValue) {
+            return $callbackValue;
         }
 
-        return null;
+        return $this->generate($field, $element);
     }
+
+    /**
+     * generate
+     *
+     * @param \craft\base\FieldInterface   $field
+     * @param \craft\base\ElementInterface $element
+     *
+     * @return mixed
+     * @author Robin Schambach
+     * @since  19/12/2023
+     */
+    public abstract function generate(FieldInterface $field, ElementInterface $element);
 }

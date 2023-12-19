@@ -8,15 +8,15 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace studioespresso\seeder\console\controllers;
+namespace anubarak\seeder\console\controllers;
 
-use studioespresso\seeder\records\SeederAssetRecord;
-use studioespresso\seeder\records\SeederEntryRecord;
-use studioespresso\seeder\records\SeederUserRecord;
-use studioespresso\seeder\Seeder;
+use anubarak\seeder\records\SeederAssetRecord;
+use anubarak\seeder\records\SeederEntryRecord;
+use anubarak\seeder\records\SeederUserRecord;
+use anubarak\seeder\Seeder;
 
 use Craft;
-use studioespresso\seeder\services\Seeder_EntriesService;
+use anubarak\seeder\services\Seeder_EntriesService;
 use yii\console\Controller;
 use yii\helpers\Console;
 

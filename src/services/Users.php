@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace studioespresso\seeder\services;
+namespace anubarak\seeder\services;
 
 use craft\elements\Asset;
 use craft\elements\Category;
@@ -18,7 +18,7 @@ use craft\errors\FieldNotFoundException;
 use craft\helpers\Console;
 use Faker\Factory;
 use Faker\Provider\Person;
-use studioespresso\seeder\Seeder;
+use anubarak\seeder\Seeder;
 
 use Craft;
 use craft\base\Component;

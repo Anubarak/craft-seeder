@@ -9,7 +9,7 @@
  * @copyright Copyright (c) 2019 Robin Schambach
  */
 
-namespace studioespresso\seeder\events;
+namespace anubarak\seeder\events;
 
 use craft\fields\Assets;
 use craft\fields\Categories;
@@ -27,7 +27,7 @@ use craft\fields\RadioButtons;
 use craft\fields\Table;
 use craft\fields\Tags;
 use craft\fields\Url;
-use studioespresso\seeder\Seeder;
+use anubarak\seeder\Seeder;
 use yii\base\Event;
 
 /**
@@ -37,7 +37,10 @@ use yii\base\Event;
  */
 class RegisterFieldTypeEvent extends Event
 {
-    public $types = [];
+    /**
+     * @var string[]
+     */
+    public array $types = [];
 
     public function init()
     {

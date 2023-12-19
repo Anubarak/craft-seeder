@@ -8,16 +8,15 @@
  * @copyright Copyright (c) 2018 studioespresso
  */
 
-namespace studioespresso\seeder\controllers;
+namespace anubarak\seeder\controllers;
 
 use craft\elements\Entry;
 use craft\elements\User;
-use studioespresso\seeder\models\SeederEntryModel;
-use studioespresso\seeder\records\SeederAssetRecord;
-use studioespresso\seeder\records\SeederCategoryRecord;
-use studioespresso\seeder\records\SeederEntryRecord;
-use studioespresso\seeder\records\SeederUserRecord;
-use studioespresso\seeder\Seeder;
+use anubarak\seeder\records\SeederAssetRecord;
+use anubarak\seeder\records\SeederCategoryRecord;
+use anubarak\seeder\records\SeederEntryRecord;
+use anubarak\seeder\records\SeederUserRecord;
+use anubarak\seeder\Seeder;
 
 use Craft;
 use craft\web\Controller;

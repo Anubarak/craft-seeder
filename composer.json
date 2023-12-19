@@ -1,5 +1,5 @@
 {
-    "name": "studioespresso/craft-seeder",
+    "name": "anubarak/craft-seeder",
     "description": "Easy entries seeder for Craft CMS",
     "type": "craft-plugin",
     "keywords": [
@@ -9,33 +9,19 @@
         "craft-plugin",
         "seeder"
     ],
-    "support": {
-        "docs": "https://github.com/studioespresso/craft3-seeder/blob/master/README.md",
-        "issues": "https://github.com/studioespresso/craft3-seeder/issues"
-    },
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Studio Espresso",
-            "homepage": "https://www.studioepsresso.co"
-        }
-    ],
     "require": {
         "craftcms/cms": "^4.0.0",
         "fakerphp/faker": "^1.23.0"
     },
-    "require-dev": {
-        "codeception/codeception": "2.4.2"
-    },
     "autoload": {
         "psr-4": {
-          "studioespresso\\seeder\\": "src/"
+          "anubarak\\seeder\\": "src/"
         }
     },
     "extra": {
-        "name": "Seeder",
-        "handle": "seeder",
-        "changelogUrl": "https://raw.githubusercontent.com/studioespresso/craft3-seeder/master/CHANGELOG.md",
-        "class": "studioespresso\\seeder\\Seeder"
+        "name": "Element Seeder",
+        "handle": "element-seeder",
+        "class": "anubarak\\seeder\\Seeder"
     }
 }

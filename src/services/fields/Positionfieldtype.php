@@ -8,13 +8,13 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace studioespresso\seeder\services\fields;
+namespace anubarak\seeder\services\fields;
 
 use Faker\Factory;
 use Faker\Provider\Base;
 use Faker\Provider\Lorem;
 use rias\positionfieldtype\fields\Position;
-use studioespresso\seeder\Seeder;
+use anubarak\seeder\Seeder;
 
 use Craft;
 use craft\base\Component;

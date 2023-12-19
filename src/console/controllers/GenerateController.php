@@ -8,17 +8,17 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace studioespresso\seeder\console\controllers;
+namespace anubarak\seeder\console\controllers;
 
 use craft\elements\User;
 use craft\errors\FieldNotFoundException;
 use craft\helpers\Json;
 use secondred\base\fields\IncrementField;
-use studioespresso\seeder\Seeder;
+use anubarak\seeder\Seeder;
 
 use Craft;
-use studioespresso\seeder\services\Seeder_EntriesService;
-use studioespresso\seeder\services\SeederService;
+use anubarak\seeder\services\Seeder_EntriesService;
+use anubarak\seeder\services\SeederService;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\helpers\Console;
@@ -38,23 +38,27 @@ class GenerateController extends Controller
 
     /**
      * Section handle or id
-     * @var String
+     * @var null|string|int $section
      */
-    public $section;
-
+    public null|string|int $section;
     /**
-     * Categories or user group handle or id
-     * @var String
+     * user group id or handle
+     *
+     * @var string|int|null $group
      */
-    public $group;
+    public null|string|int $group;
 
     /**
      * Number of entries to be seeded
      * @var Integer
      */
     public $count = 20;
-
-    public $site = null;
+    /**
+     * site handle or id
+     *
+     * @var string|null|int $site
+     */
+    public string|null|int $site = null;
 
     // Public Methods
     // =========================================================================
@@ -64,8 +68,6 @@ class GenerateController extends Controller
         switch ($actionId) {
             case 'entries':
                 return ['section','count', 'site'];
-            case 'categories':
-                return ['group','count', 'site'];
             case 'users':
                 return ['group','count'];
         }
@@ -77,46 +79,54 @@ class GenerateController extends Controller
      * The first line of this method docblock is displayed as the description
      * of the Console Command in ./craft help
      *
-     * @return mixed
+     * @return int
+     * @throws \Throwable
      * @throws \craft\errors\ElementNotFoundException
      * @throws \yii\base\Exception
+     * @throws \yii\base\ExitException
      * @throws \yii\base\InvalidConfigException
-     * @throws \Throwable
      */
-    public function actionEntries()
+    public function actionEntries(): int
     {
         if(!$this->section) {
-            echo "Section handle or id missing, please specify\n";
-            return;
+            $this->stderr('Section handle or id missing, please specify' . PHP_EOL);
+            return ExitCode::OK;
         }
 
-        $result = Seeder::$plugin->entries->generate($this->section, $this->count, $this->site);
-        return $result;
+        if (ctype_digit($this->section)) {
+            $section = Craft::$app->getSections()->getSectionById((int) $this->section);
+        } else {
+            $section = Craft::$app->getSections()->getSectionByHandle($this->section);
+        }
+
+
+        if(!$section){
+            $this->stderr('No section found with „' . $this->section .  '“' . PHP_EOL);
+            return ExitCode::OK;
+        }
+
+        $site = null;
+        if($this->site){
+            if (ctype_digit($this->site)) {
+                $site = Craft::$app->getSites()->getSiteById((int) $this->site);
+            } else {
+                $site = Craft::$app->getSites()->getSiteByHandle($this->site);
+            }
+        }
+
+        // fallback nothing set -> use default
+        if ($site === null) {
+            $site = Craft::$app->getSites()->getPrimarySite();
+        }
+
+
+        Seeder::$plugin->entries->generate(
+            $site,
+            $section,
+            $this->site
+        );
+        return ExitCode::OK;
     }
-
-    /**
-     * Generates categories for the specified group
-     *
-     * The first line of this method docblock is displayed as the description
-     * of the Console Command in ./craft help
-     *
-     * @return mixed
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\Exception
-     * @throws \yii\base\InvalidConfigException
-     * @throws \Throwable
-     */
-    public function actionCategories()
-	{
-
-        if(!$this->group) {
-            echo "Group handle or id missing, please specify\n";
-            return ExitCode::CONFIG;
-        }
-		$result = Seeder::$plugin->categories->generate($this->group, $this->count);
-
-		return ExitCode::OK;
-	}
 
     /**
      * Generates users for the specified usergroup
@@ -163,52 +173,5 @@ class GenerateController extends Controller
 
         $result = Seeder::$plugin->users->generate($this->group, $this->count);
         return ExitCode::OK;
-    }
-
-    /**
-     * Generates a set of elements predefined in your config/seeder.php
-     *
-     * The first line of this method docblock is displayed as the description
-     * of the Console Command in ./craft help
-     *
-     * @param string $name
-     *
-     * @return mixed
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\Exception
-     * @throws \yii\base\InvalidConfigException
-     * @throws \Throwable
-     */
-    public function actionSet($name = 'default') {
-        if(!array_key_exists($name, Seeder::$plugin->getSettings()->sets)) {
-            echo "Set not found\n";
-            return;
-        }
-        $settings = Seeder::$plugin->getSettings()->sets[$name];
-        foreach($settings as $type => $option) {
-            d($type, $option);
-            switch ($type) {
-                case 'Users':
-                    if(is_array($option)) {
-                        foreach ($option as $group => $count) {
-                            $result = Seeder::$plugin->users->generate($group, $count);
-                            if($result) {
-                                echo "Seeded " . $count . " entries in " . $result . "\n";
-                            }
-                        }
-                    }
-                    break;
-                case 'Entries':
-                    if(is_array($option)) {
-                        foreach ($option as $section => $count) {
-                            $result = Seeder::$plugin->entries->generate($section, $count);
-                            if($result) {
-                                echo "Seeded " . $count . " entries in " . $result . "\n";
-                            }
-                        }
-                    }
-                break;
-            }
-        }
     }
 }

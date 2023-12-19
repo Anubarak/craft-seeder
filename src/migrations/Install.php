@@ -1,13 +1,13 @@
 <?php
 
-namespace studioespresso\seeder\migrations;
+namespace anubarak\seeder\migrations;
 
 use Craft;
 use craft\db\Migration;
-use studioespresso\seeder\records\SeederAssetRecord;
-use studioespresso\seeder\records\SeederCategoryRecord;
-use studioespresso\seeder\records\SeederEntryRecord;
-use studioespresso\seeder\records\SeederUserRecord;
+use anubarak\seeder\records\SeederAssetRecord;
+use anubarak\seeder\records\SeederCategoryRecord;
+use anubarak\seeder\records\SeederEntryRecord;
+use anubarak\seeder\records\SeederUserRecord;
 use yii\db\Schema;
 
 /**

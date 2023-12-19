@@ -8,19 +8,19 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace studioespresso\seeder\services;
+namespace anubarak\seeder\services;
 
 use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
 use craft\elements\User;
-use studioespresso\seeder\records\SeederAssetRecord;
-use studioespresso\seeder\records\SeederCategoryRecord;
-use studioespresso\seeder\records\SeederEntryRecord;
+use anubarak\seeder\records\SeederAssetRecord;
+use anubarak\seeder\records\SeederCategoryRecord;
+use anubarak\seeder\records\SeederEntryRecord;
 
 use Craft;
 use craft\base\Component;
-use studioespresso\seeder\records\SeederUserRecord;
+use anubarak\seeder\records\SeederUserRecord;
 use yii\base\Model;
 
 /**

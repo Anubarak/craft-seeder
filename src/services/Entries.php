@@ -8,15 +8,18 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace studioespresso\seeder\services;
+namespace anubarak\seeder\services;
 
 use Craft;
 use craft\base\Component;
 use craft\base\Element;
 use craft\elements\Entry;
 use craft\elements\User;
+use craft\errors\ElementException;
 use craft\helpers\Json;
-use studioespresso\seeder\Seeder;
+use anubarak\seeder\Seeder;
+use craft\models\Section;
+use craft\models\Site;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -36,71 +39,75 @@ use yii\helpers\VarDumper;
 class Entries extends Component
 {
     /**
-     * @param null $section
-     * @param int  $count
+     * generate
      *
-     * @return bool|string|null
+     * @param int|string      $section
+     * @param int             $count
+     * @param int|string|null $site
+     *
+     * @return false|string|null
+     * @throws \Throwable
      * @throws \craft\errors\ElementNotFoundException
+     * @throws \craft\errors\SiteNotFoundException
      * @throws \yii\base\Exception
      * @throws \yii\base\ExitException
      * @throws \yii\base\InvalidConfigException
-     * @throws \Throwable
+     * @author Robin Schambach
+     * @since  19/12/2023
      */
-    public function generate($section = null, $count = 20, $site = null)
+    public function generate(Site $site, Section $section, int $count = 20)
     {
-        if (ctype_digit($section)) {
-            $section = Craft::$app->sections->getSectionById((int)$section);
-        } else {
-            $section = Craft::$app->sections->getSectionByHandle($section);
-        }
-
-        if (!$section) {
-            echo "Section not found\n";
-            return false;
-        }
-
-        if($site && is_string($site)){
-            $site = Craft::$app->getSites()->getSiteByHandle($site);
-        }
-
-        if($site === null){
-            $site = Craft::$app->getSites()->getPrimarySite();
-        }
-
         $entryTypes = $section->getEntryTypes();
         $current = 0;
         $total = count($entryTypes) * $count;
         $admin = User::find()->admin(true)->one();
         Console::startProgress($current, $count);
+
+
+        $db = Craft::$app->getDb();
+
         foreach ($section->getEntryTypes() as $entryType) {
             for ($x = 1; $x <= $count; $x++) {
                 $current++;
                 Console::updateProgress($current, $count);
-                if($entryType->fieldLayoutId) {
-                    $typeFields = Craft::$app->fields->getFieldsByLayoutId($entryType->getFieldLayoutId());
-                }
-                $entry = new Entry([
-                    'sectionId' => (int)$section->id,
-                    'typeId' => $entryType->id,
-                    'title' => Seeder::$plugin->fields->Title(),
-                    'siteId' => $site->id,
-                ]);
-                $entry->authorId = $admin->id;
-                Craft::$app->getElements()->saveElement($entry);
-                Seeder::$plugin->seeder->saveSeededEntry($entry);
-                $entry->setScenario(Element::SCENARIO_LIVE);
-                if($entryType->fieldLayoutId) {
-                    $entry = Seeder::$plugin->seeder->populateFields($typeFields, $entry);
-                    if(!Craft::$app->getElements()->saveElement($entry)){
-                        Console::error(VarDumper::dumpAsString($entry->getErrors()));
-                        Craft::$app->getElements()->deleteElement($entry);
+                $transaction = $db->beginTransaction();
+
+                try{
+                    $entry = new Entry([
+                        'sectionId' => (int) $section->id,
+                        'typeId'    => $entryType->id,
+                        'title'     => Seeder::$plugin->fields->Title(),
+                        'siteId'    => $site->id,
+                    ]);
+                    $entry->authorId = $admin->id;
+                    Craft::$app->getElements()->saveElement($entry);
+                    Seeder::$plugin->seeder->saveSeededEntry($entry);
+                    $entry->setScenario(Element::SCENARIO_LIVE);
+
+
+                    if ($entryType->fieldLayoutId) {
+                        $entry = Seeder::$plugin->seeder->populateFields($entry);
+                        if (!Craft::$app->getElements()->saveElement($entry)) {
+                            Console::error(VarDumper::dumpAsString($entry->getErrors()));
+                            throw new ElementException($entry, 'Could not save element due to validation errors');
+                        }
+                    }
+                    $transaction->rollBack();
+                } catch (\Throwable $throwable){
+                    $transaction->rollBack();
+                    Craft::error($throwable);
+                    Console::error('Error during seed');
+                    Console::error($throwable->getMessage());
+
+                    if($throwable instanceof ElementException){
+                        Console::error(Json::encode($throwable->element->getErrors()));
                     }
                 }
+
             }
         }
         Console::endProgress();
+
         return $section->name;
-
     }
-
 }

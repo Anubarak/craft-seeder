@@ -1,10 +1,10 @@
 <?php
 
-namespace studioespresso\seeder\migrations;
+namespace anubarak\seeder\migrations;
 
 use Craft;
 use craft\db\Migration;
-use studioespresso\seeder\records\SeederCategoryRecord;
+use anubarak\seeder\records\SeederCategoryRecord;
 
 /**
  * m190205_191102_removeSectionColumn migration.
