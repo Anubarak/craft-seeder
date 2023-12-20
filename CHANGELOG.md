@@ -1,6 +1,14 @@
 # Craft Seeder Changelog
 
-## 4.0.0-R4 - 2023-06-29
+## 4.0.0-RC4 - 2023-06-29
+
+### changed
+
+- refactor plugin code
+
+### added 
+
+- add a function to seed matrix fields
 
 ## 4.0.0-RC1 - 2023-06-29
 
