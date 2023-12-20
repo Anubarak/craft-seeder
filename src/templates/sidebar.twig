@@ -1,0 +1,33 @@
+{% import '_includes/forms' as forms %}
+
+<input type="hidden" name="action" value="element-seeder/seeder/generate-matrix">
+<input type="hidden" name="elementId" value="{{ elementId }}">
+{% for config in matrixFields %}
+    <div class="field">
+        <h3>{{ config.field.name }}</h3>
+        {% for configBlock in config.blocks %}
+            <h4>{{ configBlock.block.name }}</h4>
+
+            {% for field in configBlock.fields %}
+                <div class="field">
+                    {{ forms.lightswitchField({
+                        label: field.name,
+                        id: 'deleteMessageOnSourceDelete',
+                        name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][fields][#{field.id}]",
+                        on: false
+                    }) }}
+                </div>
+            {% endfor %}
+
+            <div class="field">
+                {{ forms.textField({
+                    label: "Alternativ, anzahl",
+                    name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][number]",
+                    type: 'number',
+                    value: 5,
+                }) }}
+            </div>
+
+        {% endfor %}
+    </div>
+{% endfor %}

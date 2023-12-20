@@ -29,7 +29,7 @@ class Entries extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Entries|FieldInterface $field, ElementInterface $element)
+    public function generate(\craft\fields\Entries|FieldInterface $field, ElementInterface $element = null)
     {
         $sources = $field->sources;
         $sectionIds = [];
@@ -51,8 +51,10 @@ class Entries extends BaseField
         if($field->targetSiteId){
             $site = \Craft::$app->getSites()->getSiteByUid($field->targetSiteId);
             $query->siteId($site->id);
-        }elseif ($element->siteId){
+        }elseif ($element && $element->siteId){
             $query->siteId($element->siteId);
+        } else {
+            $query->siteId(\Craft::$app->getSites()->getPrimarySite()->id);
         }
 
         return $query->ids();

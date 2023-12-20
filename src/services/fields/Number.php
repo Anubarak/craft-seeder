@@ -25,7 +25,7 @@ class Number extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Number|FieldInterface $field, ElementInterface $element)
+    public function generate(\craft\fields\Number|FieldInterface $field, ElementInterface $element = null)
     {
         $min = $field->min ?? 0;
         $max = $field->max ?? 100;

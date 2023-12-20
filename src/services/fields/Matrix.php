@@ -28,7 +28,7 @@ class Matrix extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Matrix|FieldInterface $field, ElementInterface $element)
+    public function generate(\craft\fields\Matrix|FieldInterface $field, ElementInterface $element = null)
     {
         $types = $field->getBlockTypes();
 
@@ -56,7 +56,9 @@ class Matrix extends BaseField
             $matrixBlock = new MatrixBlock();
             $matrixBlock->typeId = $type->id;
             $matrixBlock->fieldId = $field->id;
-            $matrixBlock->ownerId = $element->id;
+            if($element){
+                $matrixBlock->ownerId = $element->id;
+            }
             Craft::$app->elements->saveElement($matrixBlock);
             $matrixBlock = Seeder::$plugin->seeder->populateFields($matrixBlock);
             Craft::$app->elements->saveElement($matrixBlock);

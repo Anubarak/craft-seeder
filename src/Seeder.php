@@ -23,7 +23,14 @@ use anubarak\seeder\services\fields\CkEditor as CkEditorService;
 use anubarak\seeder\services\fields\Supertable as SupertableService;
 use anubarak\seeder\services\fields\CTA as CTAService;
 use anubarak\seeder\services\fields\Positionfieldtype as PositionService;
+use anubarak\seeder\web\assets\cp\SeederAssetBundle;
+use craft\base\Element;
 use craft\base\Plugin;
+use craft\elements\Entry;
+use craft\events\DefineHtmlEvent;
+use craft\events\DefineMetadataEvent;
+use craft\fields\Matrix;
+use craft\helpers\Cp;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
 
@@ -33,18 +40,18 @@ use yii\base\Event;
  *
  * @package   Seeder
  * @since     1.0.0
- * @property  SeederService seeder
- * @property  WeederService weeder
- * @property  EntriesService entries
+ * @property  SeederService     seeder
+ * @property  WeederService     weeder
+ * @property  EntriesService    entries
  * @property  CategoriesService categories
- * @property  UsersService users
- * @property  FieldsService fields
- * @property  RedactorService redactor
- * @property  CkEditorService ckeditor
+ * @property  UsersService      users
+ * @property  FieldsService     fields
+ * @property  RedactorService   redactor
+ * @property  CkEditorService   ckeditor
  * @property  SupertableService supertable
- * @property  CTAService cta
- * @property  PositionService positionfieldtype
- * @property  Settings $settings
+ * @property  CTAService        cta
+ * @property  PositionService   positionfieldtype
+ * @property  Settings          $settings
  * @method    Settings getSettings()
  */
 class Seeder extends Plugin
@@ -59,7 +66,6 @@ class Seeder extends Plugin
      * @var Seeder
      */
     public static Seeder $plugin;
-
     // Public Properties
     // =========================================================================
 
@@ -73,12 +79,10 @@ class Seeder extends Plugin
      * @inheritdoc
      */
     public bool $hasCpSettings = false;
-
     /**
      * @inheritdoc
      */
     public bool $hasCpSection = true;
-
     // Public Methods
     // =========================================================================
 
@@ -103,8 +107,43 @@ class Seeder extends Plugin
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
-            static function (RegisterUrlRulesEvent $event) {
-                $event->rules['seeder'] = 'element-seeder/seeder/index';
+            static function(RegisterUrlRulesEvent $event) {
+                $event->rules['element-seeder'] = 'element-seeder/seeder/index';
+            }
+        );
+
+        Event::on(
+            Element::class,
+            Element::EVENT_DEFINE_META_FIELDS_HTML,
+            static function(DefineHtmlEvent $event) {
+                if (!\Craft::$app->getConfig()->getGeneral()->devMode) {
+                    return;
+                }
+                if (!\Craft::$app->getUser()->getIsAdmin()) {
+                    return;
+                }
+                if (!$event->sender->id) {
+                    return;
+                }
+
+                /** @var \craft\base\ElementInterface $element */
+                $element = $event->sender;
+                $show = false;
+                if ($element::hasContent()) {
+                    foreach ($element->getFieldLayout()?->getCustomFields() as $field) {
+                        if ($field instanceof Matrix) {
+                            $show = true;
+                            break;
+                        }
+                    }
+                }
+                if (!$show) {
+                    return;
+                }
+
+                \Craft::$app->getView()->registerAssetBundle(SeederAssetBundle::class);
+                $event->html .= '<button type="button" data-element-id="' . $event->sender->id .
+                                '" class="btn seed-element">Seed</button>';
             }
         );
     }

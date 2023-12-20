@@ -28,13 +28,8 @@ use craft\config\BaseConfig;
  */
 class Settings extends BaseConfig
 {
-    // Public Properties
-    // =========================================================================
-
-    public $sets;
-    public $debug = false;
+    public $debug           = false;
     public $eachMatrixBlock = false;
-    public $useLocalAssets = false;
     /**
      * Config to provide additional information/options for certain fields in certain layouts/ scenarios
      * it's indexed by element type
@@ -78,4 +73,59 @@ class Settings extends BaseConfig
      * @var string $fakerProvider
      */
     public $fakerProvider = 'de_DE';
+
+    /**
+     * fieldsConfig
+     *
+     * @param \anubarak\seeder\models\ElementConfig[] $config
+     *
+     * @return $this
+     * @author Robin Schambach
+     * @since  20/12/2023
+     */
+    public function fieldsConfig(array $config)
+    {
+        $this->fieldsConfig = $config;
+
+        return $this;
+    }
+
+    /**
+     * setFieldsConfig
+     *
+     * @param array $config
+     *
+     * @return $this
+     * @author Robin Schambach
+     * @since  20/12/2023
+     */
+    public function setFieldsConfig(array $config)
+    {
+        $this->fieldsConfig = $config;
+
+        return $this;
+    }
+
+    /**
+     * getFieldsConfig
+     *
+     * @return \anubarak\seeder\models\ElementConfig[]
+     * @author Robin Schambach
+     * @since  20/12/2023
+     */
+    public function getFieldsConfig(): array
+    {
+        return $this->fieldsConfig;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function extraFields(): array
+    {
+        $attr =  parent::extraFields();
+        $attr[] = 'fieldsConfig';
+
+        return $attr;
+    }
 }

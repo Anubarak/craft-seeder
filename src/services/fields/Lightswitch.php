@@ -25,7 +25,7 @@ class Lightswitch extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(FieldInterface $field, ElementInterface $element)
+    public function generate(FieldInterface $field, ElementInterface $element = null)
     {
         return $this->factory->boolean;
     }

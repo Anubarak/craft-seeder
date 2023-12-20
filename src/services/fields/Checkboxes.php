@@ -26,7 +26,7 @@ class Checkboxes extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Checkboxes|FieldInterface $field, ElementInterface $element)
+    public function generate(\craft\fields\Checkboxes|FieldInterface $field, ElementInterface $element = null)
     {
         $checkedBoxes = [];
         for ($x = 1, $xMax = random_int(1, count($field->options)); $x <= $xMax; $x++) {

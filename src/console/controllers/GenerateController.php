@@ -13,6 +13,7 @@ namespace anubarak\seeder\console\controllers;
 use craft\elements\User;
 use craft\errors\FieldNotFoundException;
 use craft\helpers\Json;
+use craft\models\Section;
 use secondred\base\fields\IncrementField;
 use anubarak\seeder\Seeder;
 
@@ -35,41 +36,42 @@ use yii\helpers\Console;
  */
 class GenerateController extends Controller
 {
-
     /**
      * Section handle or id
      * @var null|string|int $section
      */
-    public null|string|int $section;
+    public null|string|int $section = null;
     /**
      * user group id or handle
      *
      * @var string|int|null $group
      */
-    public null|string|int $group;
-
+    public null|string|int $group = null;
     /**
      * Number of entries to be seeded
-     * @var Integer
+     * @var int|null $count
      */
-    public $count = 20;
+    public int|null $count = null;
     /**
      * site handle or id
      *
      * @var string|null|int $site
      */
     public string|null|int $site = null;
-
     // Public Methods
     // =========================================================================
 
 
-    public function options($actionId){
+    /**
+     * @inheritdoc
+     */
+    public function options($actionId)
+    {
         switch ($actionId) {
             case 'entries':
-                return ['section','count', 'site'];
+                return ['section', 'count', 'site'];
             case 'users':
-                return ['group','count'];
+                return ['group', 'count'];
         }
     }
 
@@ -88,9 +90,15 @@ class GenerateController extends Controller
      */
     public function actionEntries(): int
     {
-        if(!$this->section) {
-            $this->stderr('Section handle or id missing, please specify' . PHP_EOL);
-            return ExitCode::OK;
+        if (!$this->section) {
+            $options = [];
+            foreach (Craft::$app->getSections()->getAllSections() as $section) {
+                if ($section->type !== Section::TYPE_SINGLE) {
+                    $options[$section->handle] = $section->name;
+                }
+            }
+
+            $this->section = $this->select('Which section?', $options);
         }
 
         if (ctype_digit($this->section)) {
@@ -100,13 +108,14 @@ class GenerateController extends Controller
         }
 
 
-        if(!$section){
-            $this->stderr('No section found with „' . $this->section .  '“' . PHP_EOL);
+        if (!$section) {
+            $this->stderr('No section found with „' . $this->section . '“' . PHP_EOL);
+
             return ExitCode::OK;
         }
 
         $site = null;
-        if($this->site){
+        if ($this->site) {
             if (ctype_digit($this->site)) {
                 $site = Craft::$app->getSites()->getSiteById((int) $this->site);
             } else {
@@ -119,12 +128,16 @@ class GenerateController extends Controller
             $site = Craft::$app->getSites()->getPrimarySite();
         }
 
+        if($this->count === null){
+            $this->count = $this->prompt('How many would you like to create', ['default' => 20]);
+        }
 
         Seeder::$plugin->entries->generate(
             $site,
             $section,
-            $this->site
+            $this->count
         );
+
         return ExitCode::OK;
     }
 
@@ -143,35 +156,37 @@ class GenerateController extends Controller
     {
         if (Craft::$app->getEdition() !== Craft::Pro) {
             echo "Users requires your Craft install to be upgrade to Pro. You can trial Craft Pro in the control panel\n";
+
             return ExitCode::CONFIG;
         }
 
-//        $user = new User();
-//        $fields = $user->getFieldLayout()->getFields();
-//        foreach ($fields as $field){
-//            try{
-//                $data = Seeder::$plugin->getSeeder()->getFieldData($field, $user);
-//
-//                if(is_string($data)){
-//                    $message = $data;
-//                }elseif (is_array($data)){
-//                    $message = Json::encode($data);
-//                }else{
-//                    try{
-//                        $message = (string)$data;
-//                    }catch (\Exception $exception){
-//                        $message = '';
-//                    }
-//                }
-//
-//                $this->stdout($field->handle . $message . PHP_EOL);
-//            }catch (FieldNotFoundException $exception){
-//                $this->stdout($field->handle . ' could not be found' . PHP_EOL);
-//            }
-//        }
-//        Craft::$app->getElements()->saveElement($user);
+        //        $user = new User();
+        //        $fields = $user->getFieldLayout()->getFields();
+        //        foreach ($fields as $field){
+        //            try{
+        //                $data = Seeder::$plugin->getSeeder()->getFieldData($field, $user);
+        //
+        //                if(is_string($data)){
+        //                    $message = $data;
+        //                }elseif (is_array($data)){
+        //                    $message = Json::encode($data);
+        //                }else{
+        //                    try{
+        //                        $message = (string)$data;
+        //                    }catch (\Exception $exception){
+        //                        $message = '';
+        //                    }
+        //                }
+        //
+        //                $this->stdout($field->handle . $message . PHP_EOL);
+        //            }catch (FieldNotFoundException $exception){
+        //                $this->stdout($field->handle . ' could not be found' . PHP_EOL);
+        //            }
+        //        }
+        //        Craft::$app->getElements()->saveElement($user);
 
         $result = Seeder::$plugin->users->generate($this->group, $this->count);
+
         return ExitCode::OK;
     }
 }

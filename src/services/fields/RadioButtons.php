@@ -26,7 +26,7 @@ class RadioButtons extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\RadioButtons|FieldInterface $field, ElementInterface $element)
+    public function generate(\craft\fields\RadioButtons|FieldInterface $field, ElementInterface $element = null)
     {
         return $field->options[array_rand($field->options)]['value'];
     }

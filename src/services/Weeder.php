@@ -35,7 +35,6 @@ use yii\base\Model;
  */
 class Weeder extends Component
 {
-
     public function entries($sectionId)
     {
         $seededEntries = SeederEntryRecord::findAll([
@@ -54,39 +53,28 @@ class Weeder extends Component
         }
     }
 
-    public function categories() {
-        $seededCategories = SeederCategoryRecord::find();
-        foreach ($seededCategories->all() as $seededCategory) {
-            $category = Category::find()
-                ->uid($seededCategory->categoryUid)
-                ->one();
-            if($category) {
-                Craft::$app->elements->deleteElement($category);
-            }
-            SeederCategoryRecord::deleteAll(['categoryUid' => $seededCategory->categoryUid]);
-        }
-    }
-
-    public function assets() {
+    public function assets()
+    {
         $seededAssets = SeederAssetRecord::find();
-        foreach($seededAssets->all() as $seededAsset) {
+        foreach ($seededAssets->all() as $seededAsset) {
             $asset = Asset::find()
                 ->uid($seededAsset->assetUid)
                 ->one();
-            if($asset) {
+            if ($asset) {
                 Craft::$app->elements->deleteElement($asset);
                 SeederAssetRecord::deleteAll(['assetUid' => $seededAsset->assetUid]);
             }
         }
     }
 
-    public function users() {
+    public function users()
+    {
         $seededUsers = SeederUserRecord::find();
-        foreach($seededUsers->all() as $seededUser) {
+        foreach ($seededUsers->all() as $seededUser) {
             $user = User::find()
                 ->uid($seededUser->userUid)
                 ->one();
-            if($user) {
+            if ($user) {
                 Craft::$app->elements->deleteElement($user);
             }
             SeederUserRecord::deleteAll(['userUid' => $seededUser->userUid]);

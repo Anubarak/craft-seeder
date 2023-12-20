@@ -30,6 +30,7 @@ use craft\fields\Date;
 use craft\fields\Dropdown;
 use craft\fields\Email;
 use craft\fields\Lightswitch;
+use craft\fields\Matrix;
 use craft\fields\MultiSelect;
 use craft\fields\Number;
 use craft\fields\PlainText;
@@ -161,21 +162,24 @@ class SeederService extends Component
     {
         if ($this->registeredFieldTypes === null) {
             $event = new RegisterFieldTypeEvent([
-                Dropdown::class          => \anubarak\seeder\services\fields\Dropdown::class,
-                Lightswitch::class       => \anubarak\seeder\services\fields\Lightswitch::class,
-                Date::class              => \anubarak\seeder\services\fields\Date::class,
-                PlainText::class         => \anubarak\seeder\services\fields\PlainText::class,
-                Email::class             => \anubarak\seeder\services\fields\Email::class,
-                Url::class               => \anubarak\seeder\services\fields\Url::class,
-                Color::class             => \anubarak\seeder\services\fields\Color::class,
-                Checkboxes::class        => \anubarak\seeder\services\fields\Checkboxes::class,
-                RadioButtons::class      => \anubarak\seeder\services\fields\RadioButtons::class,
-                MultiSelect::class       => \anubarak\seeder\services\fields\MultiSelect::class,
-                Table::class             => \anubarak\seeder\services\fields\Table::class,
-                Entries::class           => \anubarak\seeder\services\fields\Entries::class,
-                Assets::class            => \anubarak\seeder\services\fields\Assets::class,
-                Number::class            => \anubarak\seeder\services\fields\Number::class,
-                'craft\\redactor\\Field' => Redactor::class,
+                'types' => [
+                    Dropdown::class          => \anubarak\seeder\services\fields\Dropdown::class,
+                    Lightswitch::class       => \anubarak\seeder\services\fields\Lightswitch::class,
+                    Date::class              => \anubarak\seeder\services\fields\Date::class,
+                    PlainText::class         => \anubarak\seeder\services\fields\PlainText::class,
+                    Email::class             => \anubarak\seeder\services\fields\Email::class,
+                    Url::class               => \anubarak\seeder\services\fields\Url::class,
+                    Color::class             => \anubarak\seeder\services\fields\Color::class,
+                    Checkboxes::class        => \anubarak\seeder\services\fields\Checkboxes::class,
+                    RadioButtons::class      => \anubarak\seeder\services\fields\RadioButtons::class,
+                    MultiSelect::class       => \anubarak\seeder\services\fields\MultiSelect::class,
+                    Table::class             => \anubarak\seeder\services\fields\Table::class,
+                    \craft\fields\Entries::class           => \anubarak\seeder\services\fields\Entries::class,
+                    Assets::class            => \anubarak\seeder\services\fields\Assets::class,
+                    Number::class            => \anubarak\seeder\services\fields\Number::class,
+                    Matrix::class            => \anubarak\seeder\services\fields\Matrix::class,
+                    'craft\\redactor\\Field' => Redactor::class,
+                ]
             ]);
             if ($this->hasEventHandlers(self::REGISTER_FIELD_TYPES)) {
                 $this->trigger(self::REGISTER_FIELD_TYPES, $event);
@@ -201,23 +205,25 @@ class SeederService extends Component
      * @author Robin Schambach
      * @since  05.09.2019
      */
-    public function getFieldData(FieldInterface $field, ElementInterface $element): mixed
+    public function getFieldData(FieldInterface $field, ElementInterface $element = null): mixed
     {
         $class = get_class($field);
         $registeredFieldTypes = $this->getRegisteredFieldTypes();
 
         if (isset($registeredFieldTypes[$class])) {
-            $fieldClass = $this->getFieldInstance($class);
+            $fieldClass = $this->getFieldInstance($registeredFieldTypes[$class]);
 
             return $fieldClass->run($field, $element);
         }
 
-        // last chance, try to find a valid callback
-        foreach ($registeredFieldTypes as $fieldType) {
-            if (is_string($fieldType) && $class === $fieldType) {
-                $v = Seeder::$plugin->fields->checkForEvent($field, $element);
-                if ($v) {
-                    return $v;
+        if($element !== null){
+            // last chance, try to find a valid callback
+            foreach ($registeredFieldTypes as $fieldType) {
+                if (is_string($fieldType) && $class === $fieldType) {
+                    $v = Seeder::$plugin->fields->checkForEvent($field, $element);
+                    if ($v) {
+                        return $v;
+                    }
                 }
             }
         }

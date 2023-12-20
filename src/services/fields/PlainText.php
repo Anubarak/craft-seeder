@@ -26,8 +26,12 @@ class PlainText extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\PlainText|FieldInterface $field, ElementInterface $element)
+    public function generate(\craft\fields\PlainText|FieldInterface $field, ElementInterface $element = null)
     {
-        return $this->factory->realText($field->charLimit ? $field->charLimit : 200);
+        if(!$field->multiline){
+            return $this->factory->text($field->charLimit ?: 200);
+        }
+
+        return $this->factory->realText($field->charLimit ?: 200);
     }
 }

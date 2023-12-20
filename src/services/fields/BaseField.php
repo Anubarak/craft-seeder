@@ -166,11 +166,13 @@ abstract class BaseField
      * @author Robin Schambach
      * @since  19/12/2023
      */
-    public function run(FieldInterface $field, ElementInterface $element)
+    public function run(FieldInterface $field, ElementInterface $element = null)
     {
-        $callbackValue = $this->checkForEvent($field, $element);
-        if ($callbackValue) {
-            return $callbackValue;
+        if ($element !== null) {
+            $callbackValue = $this->checkForEvent($field, $element);
+            if ($callbackValue) {
+                return $callbackValue;
+            }
         }
 
         return $this->generate($field, $element);
@@ -179,12 +181,12 @@ abstract class BaseField
     /**
      * generate
      *
-     * @param \craft\base\FieldInterface   $field
-     * @param \craft\base\ElementInterface $element
+     * @param \craft\base\FieldInterface        $field
+     * @param \craft\base\ElementInterface|null $element
      *
      * @return mixed
      * @author Robin Schambach
      * @since  19/12/2023
      */
-    public abstract function generate(FieldInterface $field, ElementInterface $element);
+    public abstract function generate(FieldInterface $field, ElementInterface $element = null);
 }

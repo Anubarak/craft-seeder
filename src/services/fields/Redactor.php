@@ -29,7 +29,7 @@ class Redactor extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(FieldInterface $field, ElementInterface $element)
+    public function generate(FieldInterface $field, ElementInterface $element = null)
     {
         return Lorem::sentences(rand(5, 20), true);
     }

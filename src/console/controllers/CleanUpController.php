@@ -10,15 +10,12 @@
 
 namespace anubarak\seeder\console\controllers;
 
-use anubarak\seeder\records\SeederAssetRecord;
 use anubarak\seeder\records\SeederEntryRecord;
-use anubarak\seeder\records\SeederUserRecord;
 use anubarak\seeder\Seeder;
 
 use Craft;
-use anubarak\seeder\services\Seeder_EntriesService;
 use yii\console\Controller;
-use yii\helpers\Console;
+use yii\console\ExitCode;
 
 /**
  * Seeder plugin
@@ -42,21 +39,21 @@ class CleanUpController extends Controller
      *
      * @return mixed
      */
-    public function actionAll()
+    public function actionIndex(): int
     {
         $sections = Craft::$app->getSections();
-        foreach($sections->getAllSections() as $section) {
-            $seededEntries = SeederEntryRecord::findAll( [
+        foreach ($sections->getAllSections() as $section) {
+            $seededEntries = SeederEntryRecord::findAll([
                 'section' => $section->id
-            ] );
-            if(count($seededEntries)) {
+            ]);
+            if (count($seededEntries)) {
                 Seeder::$plugin->weeder->entries($section->id);
             }
         }
 
-	    Seeder::$plugin->weeder->assets();
-	    Seeder::$plugin->weeder->users();
+        Seeder::$plugin->weeder->assets();
+        Seeder::$plugin->weeder->users();
 
+        return ExitCode::OK;
     }
-
 }

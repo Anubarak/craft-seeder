@@ -10,13 +10,9 @@
 
 namespace anubarak\seeder\services\fields;
 
-use Faker\Factory;
-use Faker\Provider\Base;
+use craft\base\ElementInterface;
+use craft\base\FieldInterface;
 use Faker\Provider\Lorem;
-use anubarak\seeder\Seeder;
-
-use Craft;
-use craft\base\Component;
 
 /**
  * Fields Service
@@ -25,16 +21,13 @@ use craft\base\Component;
  * @package   Seeder
  * @since     1.0.0
  */
-class CkEditor extends Component  {
+class CkEditor extends BaseField  {
 
-	public $factory;
-
-	public function __construct() {
-		$this->factory = Factory::create();
-	}
-
-	public function Field($field, $entry) {
-		return Lorem::sentences(rand(5, 20), true);
-	}
-
+    /**
+     * @inheritDoc
+     */
+    public function generate(FieldInterface $field, ElementInterface $element = null)
+    {
+        return Lorem::sentences(rand(5, 20), true);
+    }
 }

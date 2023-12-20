@@ -41,17 +41,12 @@ class Entries extends Component
     /**
      * generate
      *
-     * @param int|string      $section
-     * @param int             $count
-     * @param int|string|null $site
+     * @param \craft\models\Site    $site
      *
-     * @return false|string|null
-     * @throws \Throwable
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \craft\errors\SiteNotFoundException
-     * @throws \yii\base\Exception
-     * @throws \yii\base\ExitException
-     * @throws \yii\base\InvalidConfigException
+     * @param \craft\models\Section $section
+     * @param int                   $count
+     *
+     * @return bool
      * @author Robin Schambach
      * @since  19/12/2023
      */
@@ -61,7 +56,7 @@ class Entries extends Component
         $current = 0;
         $total = count($entryTypes) * $count;
         $admin = User::find()->admin(true)->one();
-        Console::startProgress($current, $count);
+        Console::startProgress($current, $total);
 
 
         $db = Craft::$app->getDb();
@@ -69,7 +64,7 @@ class Entries extends Component
         foreach ($section->getEntryTypes() as $entryType) {
             for ($x = 1; $x <= $count; $x++) {
                 $current++;
-                Console::updateProgress($current, $count);
+                Console::updateProgress($current, $total);
                 $transaction = $db->beginTransaction();
 
                 try{
@@ -84,7 +79,6 @@ class Entries extends Component
                     Seeder::$plugin->seeder->saveSeededEntry($entry);
                     $entry->setScenario(Element::SCENARIO_LIVE);
 
-
                     if ($entryType->fieldLayoutId) {
                         $entry = Seeder::$plugin->seeder->populateFields($entry);
                         if (!Craft::$app->getElements()->saveElement($entry)) {
@@ -92,7 +86,7 @@ class Entries extends Component
                             throw new ElementException($entry, 'Could not save element due to validation errors');
                         }
                     }
-                    $transaction->rollBack();
+                    $transaction->commit();
                 } catch (\Throwable $throwable){
                     $transaction->rollBack();
                     Craft::error($throwable);
@@ -108,6 +102,6 @@ class Entries extends Component
         }
         Console::endProgress();
 
-        return $section->name;
+        return true;
     }
 }

@@ -26,7 +26,7 @@ class Table extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Table|FieldInterface $field, ElementInterface $element)
+    public function generate(\craft\fields\Table|FieldInterface $field, ElementInterface $element = null)
     {
         if ($field->minRows) {
             $min = $field->minRows;

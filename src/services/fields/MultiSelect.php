@@ -26,7 +26,7 @@ class MultiSelect extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\MultiSelect|FieldInterface $field, ElementInterface $element)
+    public function generate(\craft\fields\MultiSelect|FieldInterface $field, ElementInterface $element = null)
     {
         $options = [];
         for ($x = 1, $xMax = random_int(1, count($field->options)); $x <= $xMax; $x++) {
