@@ -1,7 +1,7 @@
 {
   "name": "anubarak/craft-seeder",
   "description": "Easy entries seeder for Craft CMS",
-  "version": "4.0.0-RC4",
+  "version": "5.0.0-RC1",
   "type": "craft-plugin",
   "keywords": [
     "craft",
@@ -12,8 +12,9 @@
   ],
   "license": "MIT",
   "require": {
-    "craftcms/cms": "^4.0.0",
-    "fakerphp/faker": "^1.23.0"
+    "craftcms/cms": "^5.0.0",
+    "fakerphp/faker": "^1.23.0",
+    "php": "^8.2"
   },
   "autoload": {
     "psr-4": {
@@ -24,5 +25,16 @@
     "name": "Element Seeder",
     "handle": "element-seeder",
     "class": "anubarak\\seeder\\Seeder"
+  },
+  "config": {
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require-dev": {
+    "craftcms/rector": "dev-main"
   }
 }

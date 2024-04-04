@@ -11,10 +11,9 @@
 
 namespace anubarak\seeder\services\fields;
 use anubarak\seeder\Seeder;
-use Craft;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
-use craft\elements\MatrixBlock;
+use craft\elements\Entry;
 
 /**
  * Class Matrix
@@ -30,9 +29,9 @@ class Matrix extends BaseField
      */
     public function generate(\craft\fields\Matrix|FieldInterface $field, ElementInterface $element = null)
     {
-        $types = $field->getBlockTypes();
+        $types = $field->getEntryTypes();
 
-        $blockIds = [];
+        $typeIds = [];
         $types = array_map(
             static function ($type) {
                 return $type->id;
@@ -41,27 +40,27 @@ class Matrix extends BaseField
         if (Seeder::getInstance()->getSettings()->eachMatrixBlock) {
             $blockCount = count($types);
             for ($x = 0; $x < $blockCount; $x++) {
-                $blockIds[] = $types[$x];
+                $typeIds[] = $types[$x];
             }
-            shuffle($blockIds);
+            shuffle($typeIds);
         } else {
             $blockCount = random_int(!empty($field->minBlocks) ? $field->minBlocks : 1, !empty($field->maxBlocks) ? $field->maxBlocks : 6);
             for ($x = 1; $x <= $blockCount; $x++) {
-                $blockIds[] = $types[array_rand($types, 1)];
+                $typeIds[] = $types[array_rand($types, 1)];
             }
         }
 
-        foreach ($blockIds as $blockId) {
-            $type = Craft::$app->matrix->getBlockTypeById($blockId);
-            $matrixBlock = new MatrixBlock();
-            $matrixBlock->typeId = $type->id;
+        $elements = \Craft::$app->getElements();
+        foreach ($typeIds as $typeId) {
+            $matrixBlock = new Entry();
+            $matrixBlock->setTypeId($typeId);
             $matrixBlock->fieldId = $field->id;
             if($element){
                 $matrixBlock->ownerId = $element->id;
             }
-            Craft::$app->elements->saveElement($matrixBlock);
+            $elements->saveElement($matrixBlock);
             $matrixBlock = Seeder::$plugin->seeder->populateFields($matrixBlock);
-            Craft::$app->elements->saveElement($matrixBlock);
+            $elements->saveElement($matrixBlock);
         }
 
         return null;

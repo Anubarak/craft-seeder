@@ -4,16 +4,13 @@
 namespace anubarak\seeder;
 
 use anubarak\seeder\models\Settings;
-use anubarak\seeder\services\Categories;
 use anubarak\seeder\services\Entries;
 use anubarak\seeder\services\fields\CkEditor;
-use anubarak\seeder\services\fields\CTA;
 use anubarak\seeder\services\fields\Fields;
 use anubarak\seeder\services\fields\Redactor;
 use anubarak\seeder\services\fields\Supertable;
 use anubarak\seeder\services\SeederService;
 use anubarak\seeder\services\Entries as EntriesService;
-use anubarak\seeder\services\Categories as CategoriesService;
 use anubarak\seeder\services\Users;
 use anubarak\seeder\services\Weeder as WeederService;
 use anubarak\seeder\services\Users as UsersService;
@@ -21,16 +18,11 @@ use anubarak\seeder\services\fields\Fields as FieldsService;
 use anubarak\seeder\services\fields\Redactor as RedactorService;
 use anubarak\seeder\services\fields\CkEditor as CkEditorService;
 use anubarak\seeder\services\fields\Supertable as SupertableService;
-use anubarak\seeder\services\fields\CTA as CTAService;
-use anubarak\seeder\services\fields\Positionfieldtype as PositionService;
 use anubarak\seeder\web\assets\cp\SeederAssetBundle;
 use craft\base\Element;
 use craft\base\Plugin;
-use craft\elements\Entry;
 use craft\events\DefineHtmlEvent;
-use craft\events\DefineMetadataEvent;
 use craft\fields\Matrix;
-use craft\helpers\Cp;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
 
@@ -43,14 +35,11 @@ use yii\base\Event;
  * @property  SeederService     seeder
  * @property  WeederService     weeder
  * @property  EntriesService    entries
- * @property  CategoriesService categories
  * @property  UsersService      users
  * @property  FieldsService     fields
  * @property  RedactorService   redactor
  * @property  CkEditorService   ckeditor
  * @property  SupertableService supertable
- * @property  CTAService        cta
- * @property  PositionService   positionfieldtype
  * @property  Settings          $settings
  * @method    Settings getSettings()
  */
@@ -101,7 +90,6 @@ class Seeder extends Plugin
             'redactor'          => Redactor::class,
             'ckeditor'          => CkEditor::class,
             'supertable'        => Supertable::class,
-            'positionfieldtype' => PositionService::class,
         ];
 
         Event::on(

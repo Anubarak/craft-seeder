@@ -1,5 +1,12 @@
 # Craft Seeder Changelog
 
+
+## 5.0.0-RC1 - 2024-04-04
+
+### changed
+
+- initial Craft 5 version
+
 ## 4.0.0-RC4 - 2023-06-29
 
 ### changed

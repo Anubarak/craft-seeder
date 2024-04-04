@@ -10,20 +10,15 @@
 
 namespace anubarak\seeder\controllers;
 
-use craft\elements\Entry;
-use craft\elements\User;
 use anubarak\seeder\records\SeederAssetRecord;
-use anubarak\seeder\records\SeederCategoryRecord;
 use anubarak\seeder\records\SeederEntryRecord;
 use anubarak\seeder\records\SeederUserRecord;
 use anubarak\seeder\Seeder;
-
 use Craft;
 use craft\fields\BaseOptionsField;
-use craft\fields\Dropdown;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
-use craft\models\MatrixBlockType;
+use craft\models\EntryType;
 use craft\web\Controller;
 use yii\web\Response;
 
@@ -164,14 +159,14 @@ class SeederController extends Controller
             $matrixField = Craft::$app->getFields()->getFieldById($matrixFieldId);
 
             $fieldValue = [];
-            foreach ($matrixField->getBlockTypes() as $blockType) {
+            foreach ($matrixField->getEntryTypes() as $entryType) {
                 $fields = [];
                 $blockTypeConfig = $value[$blockType->id] ?? null;
                 if (!$blockTypeConfig) {
                     continue;
                 }
 
-                foreach ($blockType->getFieldLayout()->getCustomFields() as $blockTypeField) {
+                foreach ($entryType->getFieldLayout()->getCustomFields() as $blockTypeField) {
                     $blockTypeFieldConfig = $blockTypeConfig['fields'][$blockTypeField->id] ?? null;
                     if (!$blockTypeFieldConfig) {
                         continue;
@@ -180,7 +175,7 @@ class SeederController extends Controller
                 }
 
                 if($fields){
-                    $uniqueBlocks = $this->createUniqueBlocks($blockType, $fields, $i);
+                    $uniqueBlocks = $this->createUniqueBlocks($entryType, $fields, $i);
                     foreach ($uniqueBlocks as $key => $block){
                         $fieldValue[$key] = $block;
                     }
@@ -191,7 +186,7 @@ class SeederController extends Controller
                         for($x = 0; $x < $nr; $x++){
                             // just add random blocks
                             $f = [];
-                            foreach ($blockType->getFieldLayout()->getCustomFields() as $blockTypeField) {
+                            foreach ($entryType->getFieldLayout()->getCustomFields() as $blockTypeField) {
                                 $v = $seeder->getFieldData($blockTypeField);
                                 if($v){
                                     $f[$blockTypeField->handle] = $v;
@@ -199,7 +194,7 @@ class SeederController extends Controller
                             }
 
                             $fieldValue['new' . $i] = [
-                                'type' => $blockType->handle,
+                                'type' => $entryType->handle,
                                 'fields' => $f
                             ];
                             $i++;
@@ -229,7 +224,7 @@ class SeederController extends Controller
     /**
      * createUniqueBlocks
      *
-     * @param \craft\models\MatrixBlockType $blockType
+     * @param \craft\models\EntryType $blockType
      * @param array                         $fields
      * @param                               $i
      *
@@ -240,7 +235,7 @@ class SeederController extends Controller
      * @author Robin Schambach
      * @since  20/12/2023
      */
-    public function createUniqueBlocks(MatrixBlockType $blockType, array $fields, &$i): array
+    public function createUniqueBlocks(EntryType $blockType, array $fields, &$i): array
     {
         $uniques = [];
         foreach ($fields as $field) {
