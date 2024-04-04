@@ -58,6 +58,10 @@ class Matrix extends BaseField
             if($element){
                 $matrixBlock->ownerId = $element->id;
             }
+
+            if($matrixBlock->getType()->hasTitleField){
+                $matrixBlock->title =  Seeder::$plugin->fields->Title();
+            }
             $elements->saveElement($matrixBlock);
             $matrixBlock = Seeder::$plugin->seeder->populateFields($matrixBlock);
             $elements->saveElement($matrixBlock);

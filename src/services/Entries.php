@@ -61,6 +61,8 @@ class Entries extends Component
 
         $db = Craft::$app->getDb();
 
+        $elements = \Craft::$app->getElements();
+        $seeder = Seeder::$plugin->getSeeder();
         foreach ($section->getEntryTypes() as $entryType) {
             for ($x = 1; $x <= $count; $x++) {
                 $current++;
@@ -74,14 +76,14 @@ class Entries extends Component
                         'title'     => Seeder::$plugin->fields->Title(),
                         'siteId'    => $site->id,
                     ]);
-                    $entry->authorId = $admin->id;
-                    Craft::$app->getElements()->saveElement($entry);
-                    Seeder::$plugin->seeder->saveSeededEntry($entry);
+                    $entry->setAuthorIds([$admin->id]);
+                    $elements->saveElement($entry);
+                    $seeder->saveSeededEntry($entry);
                     $entry->setScenario(Element::SCENARIO_LIVE);
 
                     if ($entryType->fieldLayoutId) {
-                        $entry = Seeder::$plugin->seeder->populateFields($entry);
-                        if (!Craft::$app->getElements()->saveElement($entry)) {
+                        $entry = $seeder->populateFields($entry);
+                        if (!$elements->saveElement($entry)) {
                             Console::error(VarDumper::dumpAsString($entry->getErrors()));
                             throw new ElementException($entry, 'Could not save element due to validation errors');
                         }

@@ -7,7 +7,7 @@ use anubarak\seeder\models\Settings;
 use anubarak\seeder\services\Entries;
 use anubarak\seeder\services\fields\CkEditor;
 use anubarak\seeder\services\fields\Fields;
-use anubarak\seeder\services\fields\Redactor;
+use anubarak\seeder\services\fields\Html;
 use anubarak\seeder\services\fields\Supertable;
 use anubarak\seeder\services\SeederService;
 use anubarak\seeder\services\Entries as EntriesService;
@@ -15,7 +15,7 @@ use anubarak\seeder\services\Users;
 use anubarak\seeder\services\Weeder as WeederService;
 use anubarak\seeder\services\Users as UsersService;
 use anubarak\seeder\services\fields\Fields as FieldsService;
-use anubarak\seeder\services\fields\Redactor as RedactorService;
+use anubarak\seeder\services\fields\Html as RedactorService;
 use anubarak\seeder\services\fields\CkEditor as CkEditorService;
 use anubarak\seeder\services\fields\Supertable as SupertableService;
 use anubarak\seeder\web\assets\cp\SeederAssetBundle;
@@ -82,14 +82,14 @@ class Seeder extends Plugin
         self::$plugin = $this;
 
         $this->components = [
-            'seeder'            => SeederService::class,
-            'weeder'            => WeederService::class,
-            'entries'           => Entries::class,
-            'users'             => Users::class,
-            'fields'            => Fields::class,
-            'redactor'          => Redactor::class,
-            'ckeditor'          => CkEditor::class,
-            'supertable'        => Supertable::class,
+            'seeder'     => SeederService::class,
+            'weeder'     => WeederService::class,
+            'entries'    => Entries::class,
+            'users'      => Users::class,
+            'fields'     => Fields::class,
+            'redactor'   => Html::class,
+            'ckeditor'   => CkEditor::class,
+            'supertable' => Supertable::class,
         ];
 
         Event::on(
@@ -117,12 +117,10 @@ class Seeder extends Plugin
                 /** @var \craft\base\ElementInterface $element */
                 $element = $event->sender;
                 $show = false;
-                if ($element::hasContent()) {
-                    foreach ($element->getFieldLayout()?->getCustomFields() as $field) {
-                        if ($field instanceof Matrix) {
-                            $show = true;
-                            break;
-                        }
+                foreach ($element->getFieldLayout()?->getCustomFields() as $field) {
+                    if ($field instanceof Matrix) {
+                        $show = true;
+                        break;
                     }
                 }
                 if (!$show) {

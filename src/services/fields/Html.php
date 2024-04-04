@@ -24,7 +24,7 @@ use Faker\Provider\Lorem;
  * @since   19/12/2023
  * @author  by Robin Schambach
  */
-class Redactor extends BaseField
+class Html extends BaseField
 {
     /**
      * @inheritDoc

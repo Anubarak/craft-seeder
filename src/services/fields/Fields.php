@@ -145,13 +145,13 @@ class Fields extends Component
      *
      * @param int $maxLength
      *
-     * @return bool|string
+     * @return string
      *
      * @throws \Exception
      * @since  06.09.2019
      * @author Robin Schambach
      */
-    public function Title($maxLength = 40)
+    public function Title(int $maxLength = 40): string
     {
         $title = $this->factory->text(random_int(8, $maxLength));
         $title = substr($title, 0, strlen($title) - 1);

@@ -37,36 +37,14 @@ class EntryConfig extends ElementConfig
     protected string|null $entryType = null;
 
     /**
-     * @param string      $section
      * @param string|null $entryType
      */
-    public function __construct(string $section, string $entryType = null, array $fieldConfig = [])
+    public function __construct(string $entryType = null, array $fieldConfig = [])
     {
-        $this->section = $section;
         $this->entryType = $entryType;
         $this->fieldConfig = $fieldConfig;
 
         parent::__construct(Entry::class, $fieldConfig);
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getSection(): ?string
-    {
-        return $this->section;
-    }
-
-    /**
-     * @param string|null $section
-     *
-     * @return EntryConfig
-     */
-    public function setSection(?string $section): EntryConfig
-    {
-        $this->section = $section;
-
-        return $this;
     }
 
     /**
@@ -101,7 +79,6 @@ class EntryConfig extends ElementConfig
      */
     protected function matchElement(Entry|ElementInterface $element): bool
     {
-        return $element->getSection()->handle === $this->section &&
-               ($this->entryType === null || $this->entryType === $element->getType()->handle);
+        return $element->getType()->handle === $this->entryType;
     }
 }

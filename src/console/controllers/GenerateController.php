@@ -82,17 +82,13 @@ class GenerateController extends Controller
      * of the Console Command in ./craft help
      *
      * @return int
-     * @throws \Throwable
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\Exception
-     * @throws \yii\base\ExitException
-     * @throws \yii\base\InvalidConfigException
+     * @throws \craft\errors\SiteNotFoundException
      */
     public function actionEntries(): int
     {
         if (!$this->section) {
             $options = [];
-            foreach (Craft::$app->getSections()->getAllSections() as $section) {
+            foreach (Craft::$app->getEntries()->getAllSections() as $section) {
                 if ($section->type !== Section::TYPE_SINGLE) {
                     $options[$section->handle] = $section->name;
                 }
@@ -102,9 +98,9 @@ class GenerateController extends Controller
         }
 
         if (ctype_digit($this->section)) {
-            $section = Craft::$app->getSections()->getSectionById((int) $this->section);
+            $section = Craft::$app->getEntries()->getSectionById((int) $this->section);
         } else {
-            $section = Craft::$app->getSections()->getSectionByHandle($this->section);
+            $section = Craft::$app->getEntries()->getSectionByHandle($this->section);
         }
 
 

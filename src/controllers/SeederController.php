@@ -38,7 +38,7 @@ class SeederController extends Controller
     public function actionIndex()
     {
         $data = [];
-        $sections = Craft::$app->getSections();
+        $sections = Craft::$app->getEntries();
         foreach ($sections->getAllSections() as $section) {
             $seededEntries = SeederEntryRecord::findAll([
                 'section' => $section->id
@@ -99,11 +99,11 @@ class SeederController extends Controller
         $matrixFields = [];
         foreach ($element->getFieldLayout()?->getCustomFields() as $field) {
             if ($field instanceof Matrix) {
-                foreach ($field->getBlockTypes() as $blockType) {
+                foreach ($field->getEntryTypes() as $entryType) {
                     $subFields = [];
-                    foreach ($blockType->getFieldLayout()->getCustomFields() as $blockTypeField) {
-                        if ($blockTypeField instanceof BaseOptionsField || $blockTypeField instanceof Lightswitch) {
-                            $subFields[] = $blockTypeField;
+                    foreach ($entryType->getFieldLayout()->getCustomFields() as $entryTypeField) {
+                        if ($entryTypeField instanceof BaseOptionsField || $entryTypeField instanceof Lightswitch) {
+                            $subFields[] = $entryTypeField;
                         }
                     }
 
@@ -115,7 +115,7 @@ class SeederController extends Controller
                     }
 
                     $matrixFields[$field->id]['blocks'][] = [
-                        'block'  => $blockType,
+                        'block'  => $entryType,
                         'fields' => $subFields
                     ];
                 }
@@ -161,7 +161,7 @@ class SeederController extends Controller
             $fieldValue = [];
             foreach ($matrixField->getEntryTypes() as $entryType) {
                 $fields = [];
-                $blockTypeConfig = $value[$blockType->id] ?? null;
+                $blockTypeConfig = $value[$entryType->id] ?? null;
                 if (!$blockTypeConfig) {
                     continue;
                 }
@@ -193,8 +193,9 @@ class SeederController extends Controller
                                 }
                             }
 
-                            $fieldValue['new' . $i] = [
+                            $fieldValue['new:' . $i] = [
                                 'type' => $entryType->handle,
+                                'title' => Seeder::$plugin->fields->Title(),
                                 'fields' => $f
                             ];
                             $i++;
@@ -210,7 +211,7 @@ class SeederController extends Controller
 
             $element->setFieldValue($matrixField->handle, [
                 'sortOrder' => $ids,
-                'blocks' => $fieldValue
+                'entries' => $fieldValue
             ]);
         }
 

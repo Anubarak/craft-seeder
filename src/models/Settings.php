@@ -33,36 +33,17 @@ class Settings extends BaseConfig
     /**
      * Config to provide additional information/options for certain fields in certain layouts/ scenarios
      * it's indexed by element type
-     * [
-     *      User::class => [
-     *          'fieldHandle' => [ options ]
-     *      ]
-     *      Entry::class => [
-     *          'sectionHandle' => [
-     *              'fieldHandle' => [ options ]
-     *          ]
-     *      ]
-     *      Category::class => [
-     *          'groupHandle' => [
-     *              'fieldHandle => [options]
-     *      ]
-     * ]
      *
-     *     'fieldsConfig' => [
-     *          User::class => [
-     *              'phone'        => 'phoneNumber',
-     *              'street'       => 'streetName',
-     *              'zip'          => 'postcode',
-     *              'location'     => 'city',
-     *              'country'      => static function() {
-     *                  return 'DE';
-     *              },
-     *              'houseNumber'  => 'buildingNumber',
-     *              'textarea'     => static function() {
-     *                  return '';
-     *              },
-     *          }
-     *      ]
+     *  'fieldsConfig' => [
+     *      new EntryConfig('news', [
+     *          (new FieldCallback('headline'))
+     *              ->setCallable(fn() => 'foooooooo'),
+     *
+     *          (new FieldCallback('textOverview'))
+     *              ->setCallable(fn(\Faker\Generator $faker) => 'bar ' .  $faker->text())
+     *      ])
+     *  ]
+     *
      *
      * @var array $fieldsConfig
      */

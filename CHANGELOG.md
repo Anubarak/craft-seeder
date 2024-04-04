@@ -1,6 +1,12 @@
 # Craft Seeder Changelog
 
 
+## 5.0.0-RC2 - 2024-04-04
+
+### fixed
+
+- fixed Craft 5 issues, remove all Matrix hints, seed Entries instead of Matrix blocks
+
 ## 5.0.0-RC1 - 2024-04-04
 
 ### changed

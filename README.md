@@ -21,7 +21,7 @@ To install the plugin, follow these instructions.
 
 ### Entries (Section ID/handle, count)
 
-Use the command below, followed by the ``--section`` option and the ``--number`` of entries you want to create (defaults to 20 if ommited). This command works with both section ID and handle. 
+Use the command below, followed by the ``--section`` option and the ``--count`` of entries you want to create (defaults to 20 if ommited). This command works with both section ID and handle. 
 
 ```Shell
 php craft element-seeder/generate/entries --section=news --count=15
@@ -51,7 +51,6 @@ $config = (new Settings())
     ->fieldsConfig([
         new EntryConfig(
             'news',
-            null,
             [
                 (new FieldCallback('date'))
                     ->setCallable(
@@ -82,7 +81,7 @@ $config = (new Settings())
         )
     ]);
 
-// required for Craft 4 since they'll do an array_merge
+// required for Craft since they'll do an array_merge
 return $config->toArray([], ['fieldsConfig'], false);
 ```
 Would create a custom callback while seeding fields for entries in the section `news` for fields 

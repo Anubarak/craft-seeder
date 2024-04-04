@@ -41,7 +41,7 @@ class CleanUpController extends Controller
      */
     public function actionIndex(): int
     {
-        $sections = Craft::$app->getSections();
+        $sections = Craft::$app->getEntries();
         foreach ($sections->getAllSections() as $section) {
             $seededEntries = SeederEntryRecord::findAll([
                 'section' => $section->id

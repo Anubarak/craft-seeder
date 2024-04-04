@@ -1,7 +1,7 @@
 {
   "name": "anubarak/craft-seeder",
   "description": "Easy entries seeder for Craft CMS",
-  "version": "5.0.0-RC1",
+  "version": "5.0.0-RC2",
   "type": "craft-plugin",
   "keywords": [
     "craft",
@@ -13,7 +13,7 @@
   "license": "MIT",
   "require": {
     "craftcms/cms": "^5.0.0",
-    "fakerphp/faker": "^1.23.0",
+    "fakerphp/faker": "^2.0.x-dev",
     "php": "^8.2"
   },
   "autoload": {

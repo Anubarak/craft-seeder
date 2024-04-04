@@ -35,19 +35,29 @@ use yii\base\Model;
  */
 class Weeder extends Component
 {
+    /**
+     * entries
+     *
+     * @param $sectionId
+     *
+     * @return void
+     * @throws \Throwable
+     * @author Robin Schambach
+     * @since  04/04/2024
+     */
     public function entries($sectionId)
     {
         $seededEntries = SeederEntryRecord::findAll([
             'section' => $sectionId
         ]);
-        $section = Craft::$app->sections->getSectionById($sectionId);
+        $section = Craft::$app->getEntries()->getSectionById($sectionId);
         foreach ($seededEntries as $seededEntry) {
             $entry = Entry::find()
                 ->uid($seededEntry->entryUid)
                 ->section($section->handle)
                 ->one();
             if ($entry) {
-                Craft::$app->elements->deleteElement($entry);
+                Craft::$app->getElements()->deleteElement($entry);
             }
             SeederEntryRecord::deleteAll(['entryUid' => $seededEntry->entryUid]);
         }
