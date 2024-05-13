@@ -13,7 +13,7 @@
   "license": "MIT",
   "require": {
     "craftcms/cms": "^5.0.0",
-    "fakerphp/faker": "^2.0.x-dev",
+    "fakerphp/faker": "^v1.23.1 || ^2.0.x-dev",
     "php": "^8.2"
   },
   "autoload": {
