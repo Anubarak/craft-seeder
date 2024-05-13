@@ -53,7 +53,7 @@ class Assets extends BaseField
 
         $query = Asset::find()
             ->limit(random_int(1, $limit))
-            ->orderBy(new Expression('rand()'));
+            ->orderBy(\anubarak\seeder\helpers\DB::random());
         if ($volumeIds) {
             $query->volumeId($volumeIds);
         }

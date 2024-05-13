@@ -1,7 +1,7 @@
 {
   "name": "anubarak/craft-seeder",
   "description": "Easy entries seeder for Craft CMS",
-  "version": "5.0.0-RC6",
+  "version": "5.0.0-RC7",
   "type": "craft-plugin",
   "keywords": [
     "craft",

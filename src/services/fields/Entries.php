@@ -46,7 +46,7 @@ class Entries extends BaseField
         $query = Entry::find()
             ->sectionId($sectionIds)
             ->limit(random_int(1, $limit))
-            ->orderBy(new Expression('rand()'));
+            ->orderBy(\anubarak\seeder\helpers\DB::random());
 
         if($field->targetSiteId){
             $site = \Craft::$app->getSites()->getSiteByUid($field->targetSiteId);
