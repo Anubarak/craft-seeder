@@ -12,6 +12,8 @@ namespace anubarak\seeder\services;
 
 use anubarak\seeder\services\fields\BaseField;
 use anubarak\seeder\services\fields\Html;
+use anubarak\seeder\services\fields\Seo;
+use anubarak\seeder\services\fields\TableMaker;
 use Craft;
 use craft\base\Component;
 use craft\base\ElementInterface;
@@ -164,24 +166,26 @@ class SeederService extends Component
         if ($this->registeredFieldTypes === null) {
             $event = new RegisterFieldTypeEvent([
                 'types' => [
-                    Dropdown::class                    => \anubarak\seeder\services\fields\Dropdown::class,
-                    Lightswitch::class                 => \anubarak\seeder\services\fields\Lightswitch::class,
-                    Date::class                        => \anubarak\seeder\services\fields\Date::class,
-                    PlainText::class                   => \anubarak\seeder\services\fields\PlainText::class,
-                    Email::class                       => \anubarak\seeder\services\fields\Email::class,
-                    Url::class                         => \anubarak\seeder\services\fields\Url::class,
-                    Color::class                       => \anubarak\seeder\services\fields\Color::class,
-                    Checkboxes::class                  => \anubarak\seeder\services\fields\Checkboxes::class,
-                    RadioButtons::class                => \anubarak\seeder\services\fields\RadioButtons::class,
-                    MultiSelect::class                 => \anubarak\seeder\services\fields\MultiSelect::class,
-                    Table::class                       => \anubarak\seeder\services\fields\Table::class,
-                    \craft\fields\Entries::class       => \anubarak\seeder\services\fields\Entries::class,
-                    Assets::class                      => \anubarak\seeder\services\fields\Assets::class,
-                    Number::class                      => \anubarak\seeder\services\fields\Number::class,
-                    Matrix::class                      => \anubarak\seeder\services\fields\Matrix::class,
-                    \craft\fields\Tags::class          => \anubarak\seeder\services\fields\Tags::class,
-                    'verbb\\hyper\\fields\\HyperField' => \anubarak\seeder\services\fields\Hyper::class,
-                    'craft\\htmlfield\\HtmlField'      => Html::class,
+                    Dropdown::class                                  => \anubarak\seeder\services\fields\Dropdown::class,
+                    Lightswitch::class                               => \anubarak\seeder\services\fields\Lightswitch::class,
+                    Date::class                                      => \anubarak\seeder\services\fields\Date::class,
+                    PlainText::class                                 => \anubarak\seeder\services\fields\PlainText::class,
+                    Email::class                                     => \anubarak\seeder\services\fields\Email::class,
+                    Url::class                                       => \anubarak\seeder\services\fields\Url::class,
+                    Color::class                                     => \anubarak\seeder\services\fields\Color::class,
+                    Checkboxes::class                                => \anubarak\seeder\services\fields\Checkboxes::class,
+                    RadioButtons::class                              => \anubarak\seeder\services\fields\RadioButtons::class,
+                    MultiSelect::class                               => \anubarak\seeder\services\fields\MultiSelect::class,
+                    Table::class                                     => \anubarak\seeder\services\fields\Table::class,
+                    \craft\fields\Entries::class                     => \anubarak\seeder\services\fields\Entries::class,
+                    Assets::class                                    => \anubarak\seeder\services\fields\Assets::class,
+                    Number::class                                    => \anubarak\seeder\services\fields\Number::class,
+                    Matrix::class                                    => \anubarak\seeder\services\fields\Matrix::class,
+                    \craft\fields\Tags::class                        => \anubarak\seeder\services\fields\Tags::class,
+                    'verbb\\hyper\\fields\\HyperField'               => \anubarak\seeder\services\fields\Hyper::class,
+                    'craft\\htmlfield\\HtmlField'                    => Html::class,
+                    'secondred\\tablemaker\\fields\\TableMakerField' => TableMaker::class,
+                    'ether\\seo\\fields\\SeoField'                   => Seo::class
                 ]
             ]);
             if ($this->hasEventHandlers(self::REGISTER_FIELD_TYPES)) {

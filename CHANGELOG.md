@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+## 5.0.0-RC8 - 2024-06-11
+
+### added
+
+- added Either Seo as supported fields
+- added tablemaker as supported fields
 
 ## 5.0.0-RC2 - 2024-04-04
 
