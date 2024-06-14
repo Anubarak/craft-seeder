@@ -117,7 +117,8 @@ class Seeder extends Plugin
                 /** @var \craft\base\ElementInterface $element */
                 $element = $event->sender;
                 $show = false;
-                foreach ($element->getFieldLayout()?->getCustomFields() as $field) {
+                $customFields = $element->getFieldLayout()?->getCustomFields() ?? [];
+                foreach ($customFields as $field) {
                     if ($field instanceof Matrix) {
                         $show = true;
                         break;

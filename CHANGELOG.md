@@ -1,5 +1,12 @@
 # Craft Seeder Changelog
 
+
+## 5.0.0-RC9 - 2024-06-14
+
+### fixed
+
+- fixed a bug when an element type had no field layout
+
 ## 5.0.0-RC8 - 2024-06-11
 
 ### added
