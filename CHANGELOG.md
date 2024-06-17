@@ -1,6 +1,12 @@
 # Craft Seeder Changelog
 
 
+## 5.0.0-RC10 - 2024-06-17
+
+### changed
+
+- only show seeder in CP for entries
+
 ## 5.0.0-RC9 - 2024-06-14
 
 ### fixed

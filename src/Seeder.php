@@ -21,6 +21,7 @@ use anubarak\seeder\services\fields\Supertable as SupertableService;
 use anubarak\seeder\web\assets\cp\SeederAssetBundle;
 use craft\base\Element;
 use craft\base\Plugin;
+use craft\elements\Entry;
 use craft\events\DefineHtmlEvent;
 use craft\fields\Matrix;
 use craft\web\UrlManager;
@@ -111,6 +112,10 @@ class Seeder extends Plugin
                     return;
                 }
                 if (!$event->sender->id) {
+                    return;
+                }
+
+                if(!$event->sender instanceof Entry){
                     return;
                 }
 
