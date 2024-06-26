@@ -10,19 +10,18 @@
 
 namespace anubarak\seeder\console\controllers;
 
-use craft\elements\User;
-use craft\errors\FieldNotFoundException;
-use craft\helpers\Json;
+use anubarak\seeder\services\Assets;
+use anubarak\seeder\services\Entries;
+use anubarak\seeder\services\Users;
+use craft\helpers\Console;
+use craft\models\EntryType;
 use craft\models\Section;
-use secondred\base\fields\IncrementField;
 use anubarak\seeder\Seeder;
-
 use Craft;
-use anubarak\seeder\services\Seeder_EntriesService;
-use anubarak\seeder\services\SeederService;
+use craft\models\UserGroup;
+use Illuminate\Support\Collection;
 use yii\console\Controller;
 use yii\console\ExitCode;
-use yii\helpers\Console;
 
 /**
  * Seeder for Craft CMS 3.x - by Studio Espresso
@@ -42,11 +41,21 @@ class GenerateController extends Controller
      */
     public null|string|int $section = null;
     /**
+     * entry type handles
+     *
+     * @var string|null $type
+     */
+    public string|null $type = null;
+    /**
+     * @var string|int|null
+     */
+    public null|string|int $volume = null;
+    /**
      * user group id or handle
      *
-     * @var string|int|null $group
+     * @var string|null $group
      */
-    public null|string|int $group = null;
+    public null|string $group = null;
     /**
      * Number of entries to be seeded
      * @var int|null $count
@@ -69,9 +78,11 @@ class GenerateController extends Controller
     {
         switch ($actionId) {
             case 'entries':
-                return ['section', 'count', 'site'];
+                return ['section', 'count', 'site', 'type'];
             case 'users':
                 return ['group', 'count'];
+            case 'assets':
+                return ['volume', 'count'];
         }
     }
 
@@ -84,7 +95,7 @@ class GenerateController extends Controller
      * @return int
      * @throws \craft\errors\SiteNotFoundException
      */
-    public function actionEntries(): int
+    public function actionEntries(Entries $entries): int
     {
         if (!$this->section) {
             $options = [];
@@ -110,6 +121,19 @@ class GenerateController extends Controller
             return ExitCode::OK;
         }
 
+        $entryTypes = [];
+        if ($this->type === null) {
+            $types = Collection::make($section->getEntryTypes());
+            $handles = $types
+                ->map(fn(EntryType $type) => $type->handle)
+                ->all();
+            $selected = $this->multiSelect('Which entry type?', $handles);
+            $entryTypes = $types
+                ->filter(fn(EntryType $type) => in_array($type->handle, $selected, true))
+                ->all();
+        }
+
+
         $site = null;
         if ($this->site) {
             if (ctype_digit($this->site)) {
@@ -124,15 +148,19 @@ class GenerateController extends Controller
             $site = Craft::$app->getSites()->getPrimarySite();
         }
 
-        if($this->count === null){
-            $this->count = $this->prompt('How many would you like to create', ['default' => 20]);
-        }
+        $this->ensureCount();
 
-        Seeder::$plugin->entries->generate(
+        Console::startProgress(0, $this->count);
+        $entries->generate(
             $site,
             $section,
-            $this->count
+            $entryTypes,
+            $this->count,
+            function($done, $max) {
+                Console::updateProgress($done, $max);
+            }
         );
+        Console::endProgress();
 
         return ExitCode::OK;
     }
@@ -140,15 +168,14 @@ class GenerateController extends Controller
     /**
      * Generates users for the specified usergroup
      *
-     * The first line of this method docblock is displayed as the description
-     * of the Console Command in ./craft help
+     * @param \anubarak\seeder\services\Users $users
      *
-     * @return mixed
+     * @return int
+     * @throws \Throwable
      * @throws \craft\errors\ElementNotFoundException
      * @throws \yii\base\Exception
-     * @throws \Throwable
      */
-    public function actionUsers()
+    public function actionUsers(Users $users): int
     {
         if (Craft::$app->getEdition() !== Craft::Pro) {
             echo "Users requires your Craft install to be upgrade to Pro. You can trial Craft Pro in the control panel\n";
@@ -156,33 +183,144 @@ class GenerateController extends Controller
             return ExitCode::CONFIG;
         }
 
-        //        $user = new User();
-        //        $fields = $user->getFieldLayout()->getFields();
-        //        foreach ($fields as $field){
-        //            try{
-        //                $data = Seeder::$plugin->getSeeder()->getFieldData($field, $user);
-        //
-        //                if(is_string($data)){
-        //                    $message = $data;
-        //                }elseif (is_array($data)){
-        //                    $message = Json::encode($data);
-        //                }else{
-        //                    try{
-        //                        $message = (string)$data;
-        //                    }catch (\Exception $exception){
-        //                        $message = '';
-        //                    }
-        //                }
-        //
-        //                $this->stdout($field->handle . $message . PHP_EOL);
-        //            }catch (FieldNotFoundException $exception){
-        //                $this->stdout($field->handle . ' could not be found' . PHP_EOL);
-        //            }
-        //        }
-        //        Craft::$app->getElements()->saveElement($user);
+        $groups = [];
+        $userGroups = Collection::make(Craft::$app->getUserGroups()->getAllGroups());
+        if ($this->group === null && $userGroups->count()) {
+            $handles = $userGroups->map(fn(UserGroup $option) => $option->handle)->all();
+            $selected = $this->multiSelect('Which user groups?', $handles, []);
+            $groups = $userGroups
+                ->filter(fn(UserGroup $type) => in_array($type->handle, $selected, true))
+                ->all();
+        } elseif ($this->group && $userGroups->count()) {
+            $selected = explode(',', $this->group);
+            $groups = $userGroups
+                ->filter(fn(UserGroup $type) => in_array($type->handle, $selected, true))
+                ->all();
+        }
 
-        $result = Seeder::$plugin->users->generate($this->group, $this->count);
+        $this->ensureCount();
+
+        Console::startProgress(0, $this->count);
+        $users->generate($groups, $this->count, function($done, $max) {
+            Console::updateProgress($done, $max);
+        });
+        Console::endProgress();
 
         return ExitCode::OK;
+    }
+
+    /**
+     * actionAssets
+     *
+     * @param \anubarak\seeder\services\Assets $assets
+     *
+     * @return int
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Throwable
+     * @throws \craft\errors\ElementNotFoundException
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\Exception
+     * @author Robin Schambach
+     * @since  25.06.2024
+     */
+    public function actionAssets(Assets $assets): int
+    {
+        if (!$this->volume) {
+            $options = [];
+            foreach (Craft::$app->getVolumes()->getAllVolumes() as $object) {
+                $options[$object->handle] = $object->name;
+            }
+
+            $this->volume = $this->select('Which Volume?', $options);
+        }
+
+        if (ctype_digit($this->volume)) {
+            $volume = Craft::$app->getVolumes()->getVolumeById((int) $this->volume);
+        } else {
+            $volume = Craft::$app->getVolumes()->getVolumeByHandle($this->volume);
+        }
+
+        $this->ensureCount(20);
+
+        Console::startProgress(0, $this->count);
+        $assets->generate($volume, $this->count, function($done, $max) {
+            Console::updateProgress($done, $max);
+        });
+        Console::endProgress();
+
+        return ExitCode::OK;
+    }
+
+    /**
+     * ensureCount
+     *
+     * @author Robin Schambach
+     * @since  25.06.2024
+     */
+    protected function ensureCount(int $max = null): void
+    {
+        if ($this->count === null) {
+            $config = ['default' => 20];
+            $message = 'How many would you like to create';
+            if ($max) {
+                $message .= ' (max:  ' . $max . ')';
+                $config['validator'] = function($input, &$error) use ($max) {
+                    if ((int) ($input) > $max) {
+                        $error = 'Must be less than ' . $max;
+
+                        return false;
+                    }
+
+                    return true;
+                };
+            }
+            $this->count = $this->prompt($message, $config);
+        } else {
+            if ($max !== null && $this->count > $max) {
+                $this->count = null;
+                $this->ensureCount($max);
+            }
+        }
+    }
+
+    /**
+     * multiSelect
+     *
+     * @param string       $message
+     * @param array        $options
+     * @param string|array $defaultValue
+     *
+     * @return array
+     * @author Robin Schambach
+     * @since  26.06.2024
+     */
+    protected function multiSelect(string $message, array $options, string|array $defaultValue = null): array
+    {
+        $this->stdout($message . PHP_EOL);
+
+        foreach ($options as $option) {
+            Console::stdout(' - ' . $option . PHP_EOL);
+        }
+
+        $selectedTypes = $this->prompt('select comma separated', [
+            'default'   => $defaultValue === null ? implode(',', $options) : $defaultValue,
+            'validator' => function($input, &$error) use ($options) {
+                $types = explode(',', $input);
+                if (empty($types)) {
+                    return true;
+                }
+
+                $error = '';
+                foreach ($types as $type) {
+                    if (!in_array($type, $options, true)) {
+                        $error = 'No option found with „' . $type . '“';
+                    }
+                }
+
+                return !$error;
+            }
+        ]);
+
+        return is_string($selectedTypes) ? explode(',', $selectedTypes) : $selectedTypes;
     }
 }

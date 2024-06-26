@@ -26,6 +26,12 @@ use yii\db\Expression;
  */
 class Assets extends BaseField
 {
+
+    public function __construct(\Faker\Generator $factory, protected \anubarak\seeder\services\Assets $assetService)
+    {
+        parent::__construct($factory);
+    }
+
     /**
      * @inheritDoc
      */
@@ -41,7 +47,22 @@ class Assets extends BaseField
 
             foreach ($source as $s) {
                 $volumeUid = str_replace('folder:', '', $s);
-                $volumeIds[] = Db::idByUid(\craft\db\Table::VOLUMES, $volumeUid);
+                $volumeId =  Db::idByUid(\craft\db\Table::VOLUMES, $volumeUid);
+
+                // in case there are no images in that volume yet -> generate a few...
+                $tmpImages = Asset::find()->volumeId($volumeId)->exists();
+                if(!$tmpImages){
+                    $volume = \Craft::$app->getVolumes()->getVolumeById($volumeId);
+                    $this->assetService->generate($volume, 50);
+                }
+
+
+                $volumeIds[] =$volumeId;
+            }
+        } else if(!Asset::find()->exists()) {
+            // no image -> seed one for each volume
+            foreach (\Craft::$app->getVolumes()->getAllVolumes() as $volume){
+                $this->assetService->generate($volume, 50);
             }
         }
 
@@ -63,5 +84,10 @@ class Assets extends BaseField
         }
 
         return $query->ids();
+    }
+
+    protected function seedImages()
+    {
+
     }
 }

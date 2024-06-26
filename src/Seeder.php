@@ -4,29 +4,24 @@
 namespace anubarak\seeder;
 
 use anubarak\seeder\models\Settings;
+use anubarak\seeder\services\Assets;
 use anubarak\seeder\services\Entries;
-use anubarak\seeder\services\fields\CkEditor;
 use anubarak\seeder\services\fields\Fields;
-use anubarak\seeder\services\fields\Html;
-use anubarak\seeder\services\fields\Supertable;
 use anubarak\seeder\services\SeederService;
 use anubarak\seeder\services\Entries as EntriesService;
 use anubarak\seeder\services\Users;
 use anubarak\seeder\services\Weeder as WeederService;
 use anubarak\seeder\services\Users as UsersService;
 use anubarak\seeder\services\fields\Fields as FieldsService;
-use anubarak\seeder\services\fields\Html as RedactorService;
-use anubarak\seeder\services\fields\CkEditor as CkEditorService;
-use anubarak\seeder\services\fields\Supertable as SupertableService;
 use anubarak\seeder\web\assets\cp\SeederAssetBundle;
 use craft\base\Element;
 use craft\base\Plugin;
 use craft\elements\Entry;
 use craft\events\DefineHtmlEvent;
 use craft\fields\Matrix;
+use craft\helpers\Html;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
-
 use yii\base\Event;
 
 /**
@@ -38,9 +33,6 @@ use yii\base\Event;
  * @property  EntriesService    entries
  * @property  UsersService      users
  * @property  FieldsService     fields
- * @property  RedactorService   redactor
- * @property  CkEditorService   ckeditor
- * @property  SupertableService supertable
  * @property  Settings          $settings
  * @method    Settings getSettings()
  */
@@ -76,7 +68,14 @@ class Seeder extends Plugin
     // Public Methods
     // =========================================================================
 
-    public function init()
+    /**
+     * init
+     *
+     * @return void
+     * @author Robin Schambach
+     * @since  26.06.2024
+     */
+    public function init(): void
     {
         parent::init();
 
@@ -88,9 +87,7 @@ class Seeder extends Plugin
             'entries'    => Entries::class,
             'users'      => Users::class,
             'fields'     => Fields::class,
-            'redactor'   => Html::class,
-            'ckeditor'   => CkEditor::class,
-            'supertable' => Supertable::class,
+            'assets'     => Assets::class,
         ];
 
         Event::on(
@@ -115,7 +112,7 @@ class Seeder extends Plugin
                     return;
                 }
 
-                if(!$event->sender instanceof Entry){
+                if (!$event->sender instanceof Entry) {
                     return;
                 }
 
@@ -134,8 +131,21 @@ class Seeder extends Plugin
                 }
 
                 \Craft::$app->getView()->registerAssetBundle(SeederAssetBundle::class);
-                $event->html .= '<button type="button" data-element-id="' . $event->sender->id .
-                                '" class="btn seed-element">Seed</button>';
+
+                $div = Html::tag('div', '', [
+                    'data-icon' => 'wand-magic-sparkles'
+                ]);
+                $event->html = Html::tag('button', $div. 'Seed Matrix', [
+                    'type' => 'button',
+
+                    'data' => [
+                        'element-id' => $event->sender->id
+                    ],
+                    'class' => [
+                        'btn',
+                        'seed-element',
+                    ]
+                ]);
             }
         );
     }
@@ -155,7 +165,7 @@ class Seeder extends Plugin
 
     /**
      * @noinspection PhpDocMissingThrowsInspection
-     * @return SeederService|object
+     * @return SeederService
      */
     public function getSeeder(): SeederService
     {

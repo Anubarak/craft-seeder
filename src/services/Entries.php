@@ -41,35 +41,43 @@ class Entries extends Component
     /**
      * generate
      *
-     * @param \craft\models\Site    $site
+     * @param \craft\models\Site        $site
      *
-     * @param \craft\models\Section $section
-     * @param int                   $count
+     * @param \craft\models\Section     $section
+     * @param \craft\models\EntryType[] $entryTypes
+     * @param int                       $count
+     * @param callable|null             $cb
      *
      * @return bool
      * @author Robin Schambach
      * @since  19/12/2023
      */
-    public function generate(Site $site, Section $section, int $count = 20)
-    {
-        $entryTypes = $section->getEntryTypes();
+    public function generate(
+        Site     $site,
+        Section  $section,
+        array    $entryTypes = [],
+        int      $count = 20,
+        callable $cb = null
+    ): bool {
+        if (empty($entryTypes)) {
+            $entryTypes = $section->getEntryTypes();
+        }
         $current = 0;
         $total = count($entryTypes) * $count;
         $admin = User::find()->admin(true)->one();
-        Console::startProgress($current, $total);
-
-
         $db = Craft::$app->getDb();
-
         $elements = \Craft::$app->getElements();
         $seeder = Seeder::$plugin->getSeeder();
-        foreach ($section->getEntryTypes() as $entryType) {
+
+        foreach ($entryTypes as $entryType) {
             for ($x = 1; $x <= $count; $x++) {
                 $current++;
-                Console::updateProgress($current, $total);
+                if($cb){
+                    $cb($current, $total);
+                }
                 $transaction = $db->beginTransaction();
 
-                try{
+                try {
                     $entry = new Entry([
                         'sectionId' => (int) $section->id,
                         'typeId'    => $entryType->id,
@@ -89,20 +97,18 @@ class Entries extends Component
                         }
                     }
                     $transaction->commit();
-                } catch (\Throwable $throwable){
+                } catch (\Throwable $throwable) {
                     $transaction->rollBack();
                     Craft::error($throwable);
                     Console::error('Error during seed');
                     Console::error($throwable->getMessage());
 
-                    if($throwable instanceof ElementException){
+                    if ($throwable instanceof ElementException) {
                         Console::error(Json::encode($throwable->element->getErrors()));
                     }
                 }
-
             }
         }
-        Console::endProgress();
 
         return true;
     }

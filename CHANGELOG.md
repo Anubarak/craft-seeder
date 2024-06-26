@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+## 5.0.0 - 2024-06-26
+
+### added
+
+- added lorem-pixel to seed images
+- added entry type select for entries 
 
 ## 5.0.0-RC10 - 2024-06-17
 

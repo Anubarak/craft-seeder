@@ -10,7 +10,6 @@ $config = (new Settings())
     ->fieldsConfig([
         new EntryConfig(
             'news',
-            null,
             [
                 (new FieldCallback('date'))
                     ->setCallable(

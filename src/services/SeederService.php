@@ -18,6 +18,7 @@ use Craft;
 use craft\base\Component;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
+use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\errors\FieldNotFoundException;
 use anubarak\seeder\events\RegisterFieldTypeEvent;
@@ -136,7 +137,7 @@ class SeederService extends Component
     /**
      * @param \craft\elements\Asset $asset
      */
-    public function saveSeededAsset($asset): void
+    public function saveSeededAsset(Asset $asset): void
     {
         $record = new SeederAssetRecord();
         $record->assetUid = $asset->uid;
