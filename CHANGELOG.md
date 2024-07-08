@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+## 5.0.0.1 - 2024-07-08
+
+### added 
+
+- add a way to populate certain fields for single elements directly via CP or console
+
 ## 5.0.0 - 2024-06-26
 
 ### added

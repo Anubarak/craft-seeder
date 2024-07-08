@@ -126,26 +126,49 @@ class Seeder extends Plugin
                         break;
                     }
                 }
-                if (!$show) {
-                    return;
-                }
+
 
                 \Craft::$app->getView()->registerAssetBundle(SeederAssetBundle::class);
+
 
                 $div = Html::tag('div', '', [
                     'data-icon' => 'wand-magic-sparkles'
                 ]);
-                $event->html = Html::tag('button', $div. 'Seed Matrix', [
+                $content = Html::tag('button', $div. 'Seed Content', [
                     'type' => 'button',
-
                     'data' => [
                         'element-id' => $event->sender->id
                     ],
                     'class' => [
                         'btn',
-                        'seed-element',
+                        'seed-element-content',
                     ]
                 ]);
+
+                if ($show) {
+                    $div = Html::tag('div', '', [
+                        'data-icon' => 'wand-magic-sparkles'
+                    ]);
+                    $content .= Html::tag('button', $div. 'Seed Matrix', [
+                        'type' => 'button',
+
+                        'data' => [
+                            'element-id' => $event->sender->id
+                        ],
+                        'class' => [
+                            'btn',
+                            'seed-element',
+                        ]
+                    ]);
+                }
+
+                $outerDiv = Html::tag('div', $content , [
+                    'class' => [
+                        'flex'
+                    ]
+                ]);
+                $event->html = $outerDiv;
+
             }
         );
     }

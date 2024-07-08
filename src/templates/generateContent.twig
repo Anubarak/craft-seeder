@@ -1,0 +1,18 @@
+{% import '_includes/forms' as forms %}
+
+<input type="hidden" name="action" value="element-seeder/seeder/generate-content">
+<input type="hidden" name="elementId" value="{{ elementId }}">
+{% for data in fieldData %}
+    <div class="field">
+        <h2>{{ data.tab }}</h2>
+        <div>
+            {% for field in data.fields %}
+                {{ forms.lightSwitchField({
+                    label: field.label(),
+                    name: 'fields[' ~ field.attribute() ~ ']',
+                }) }}
+            {% endfor %}
+        </div>
+    </div>
+    <hr>
+{% endfor %}

@@ -15,6 +15,7 @@ use anubarak\seeder\records\SeederEntryRecord;
 use anubarak\seeder\records\SeederUserRecord;
 use anubarak\seeder\Seeder;
 use Craft;
+use craft\fieldlayoutelements\CustomField;
 use craft\fields\BaseOptionsField;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
@@ -130,6 +131,77 @@ class SeederController extends Controller
     }
 
     /**
+     * actionElementContentModal
+     *
+     * @return \yii\web\Response
+     * @author Robin Schambach
+     * @since  08.07.2024
+     */
+    public function actionElementContentModal(): Response
+    {
+        $elementId = $this->request->getQueryParam('elementId');
+        $element = Craft::$app->getElements()->getElementById($elementId);
+        $data = [];
+        if ($element->getFieldLayout()) {
+            foreach ($element->getFieldLayout()->getTabs() as $tab) {
+                $d = [
+                    'tab'    => $tab->name,
+                    'fields' => []
+                ];
+                foreach ($tab->getElements() as $fieldLayoutElement) {
+                    if ($fieldLayoutElement instanceof CustomField) {
+                        $d['fields'][] = $fieldLayoutElement;
+                    }
+                }
+                $data[] = $d;
+            }
+        }
+
+        return $this->asCpScreen()
+            ->contentTemplate('element-seeder/generateContent.twig', [
+                'elementId' => $element->id,
+                'fieldData' => $data,
+            ]);
+    }
+
+    /**
+     * actionGenerateContent
+     *
+     * @return \yii\web\Response
+     * @throws \Throwable
+     * @throws \craft\errors\ElementNotFoundException
+     * @throws \yii\base\Exception
+     * @throws \yii\base\ExitException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
+     * @throws \yii\web\MethodNotAllowedHttpException
+     * @author Robin Schambach
+     * @since  08.07.2024
+     */
+    public function actionGenerateContent(): Response
+    {
+        $this->requirePostRequest();
+        $elementId = $this->request->getBodyParam('elementId');
+        $element = Craft::$app->getElements()->getElementById($elementId);
+
+        $seeder = Seeder::$plugin->getSeeder();
+
+        $fields = $this->request->getBodyParam('fields');
+        $fieldHandles = [];
+        foreach ($fields as $handle => $value) {
+            if ((bool) $value) {
+                $fieldHandles[] = $handle;
+            }
+        }
+        $seeder->populateFields($element, $fieldHandles);
+        if (!\Craft::$app->getElements()->saveElement($element)) {
+            return $this->asModelFailure($element, 'Could not save Element due to validation errors');
+        }
+
+        return $this->asSuccess('Content generated successfully');
+    }
+
+    /**
      * actionGenerateMatrix
      *
      * @return \yii\web\Response
@@ -174,28 +246,28 @@ class SeederController extends Controller
                     $fields[] = $blockTypeField;
                 }
 
-                if($fields){
+                if ($fields) {
                     $uniqueBlocks = $this->createUniqueBlocks($entryType, $fields, $i);
-                    foreach ($uniqueBlocks as $key => $block){
+                    foreach ($uniqueBlocks as $key => $block) {
                         $fieldValue[$key] = $block;
                     }
                 } else {
                     // add a number of blocks
                     $nr = $blockTypeConfig['number'] ?? null;
                     if ($nr) {
-                        for($x = 0; $x < $nr; $x++){
+                        for ($x = 0; $x < $nr; $x++) {
                             // just add random blocks
                             $f = [];
                             foreach ($entryType->getFieldLayout()->getCustomFields() as $blockTypeField) {
                                 $v = $seeder->getFieldData($blockTypeField);
-                                if($v){
+                                if ($v) {
                                     $f[$blockTypeField->handle] = $v;
                                 }
                             }
 
                             $fieldValue['new:' . $i] = [
-                                'type' => $entryType->handle,
-                                'title' => Seeder::$plugin->fields->Title(),
+                                'type'   => $entryType->handle,
+                                'title'  => Seeder::$plugin->fields->Title(),
                                 'fields' => $f
                             ];
                             $i++;
@@ -205,17 +277,17 @@ class SeederController extends Controller
             }
 
             $ids = $element->getFieldValue($matrixField->handle)->ids();
-            foreach ($fieldValue as $key => $item){
-                $ids[] =$key;
+            foreach ($fieldValue as $key => $item) {
+                $ids[] = $key;
             }
 
             $element->setFieldValue($matrixField->handle, [
                 'sortOrder' => $ids,
-                'entries' => $fieldValue
+                'entries'   => $fieldValue
             ]);
         }
 
-        if(!Craft::$app->getElements()->saveElement($element)){
+        if (!Craft::$app->getElements()->saveElement($element)) {
             return $this->asModelFailure($element);
         }
 
@@ -225,7 +297,7 @@ class SeederController extends Controller
     /**
      * createUniqueBlocks
      *
-     * @param \craft\models\EntryType $blockType
+     * @param \craft\models\EntryType       $blockType
      * @param array                         $fields
      * @param                               $i
      *
@@ -281,7 +353,7 @@ class SeederController extends Controller
             }
 
             $fieldValue['new' . $i] = [
-                'type' => $blockType->handle,
+                'type'   => $blockType->handle,
                 'fields' => $f
             ];
             $i++;
@@ -303,6 +375,7 @@ class SeederController extends Controller
     {
         if ($arrays === []) {
             yield [];
+
             return;
         }
         $head = array_shift($arrays);

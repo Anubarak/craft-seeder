@@ -95,7 +95,7 @@ class SeederService extends Component
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\base\NotSupportedException
      */
-    public function populateFields(ElementInterface $element): ElementInterface
+    public function populateFields(ElementInterface $element, array $fieldHandles = []): ElementInterface
     {
         $layout = $element->getFieldLayout();
         // no layout -> nothing we can do ¯\_(ツ)_/¯
@@ -106,6 +106,10 @@ class SeederService extends Component
         $fields = $layout->getCustomFields();
 
         foreach ($fields as $field) {
+            if (!empty($fieldHandles) && !\in_array($field->handle, $fieldHandles, true)) {
+                continue;
+            }
+
             try {
                 $fieldData = $this->getFieldData($field, $element);
                 if ($fieldData) {
