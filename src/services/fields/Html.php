@@ -31,6 +31,6 @@ class Html extends BaseField
      */
     public function generate(FieldInterface $field, ElementInterface $element = null)
     {
-        return Lorem::sentences(rand(5, 20), true);
+        return \craft\helpers\Html::tag('p', Lorem::sentences(rand(5, 20), true));
     }
 }

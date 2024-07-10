@@ -15,12 +15,16 @@ use anubarak\seeder\records\SeederEntryRecord;
 use anubarak\seeder\records\SeederUserRecord;
 use anubarak\seeder\Seeder;
 use Craft;
+use craft\db\Query;
+use craft\db\Table;
+use craft\errors\ElementException;
 use craft\fieldlayoutelements\CustomField;
 use craft\fields\BaseOptionsField;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
 use craft\models\EntryType;
 use craft\web\Controller;
+use yii\web\HttpException;
 use yii\web\Response;
 
 /**
@@ -139,11 +143,36 @@ class SeederController extends Controller
      */
     public function actionElementContentModal(): Response
     {
+        $ids = [];
         $elementId = $this->request->getQueryParam('elementId');
-        $element = Craft::$app->getElements()->getElementById($elementId);
+        if ($elementId) {
+            $ids = [$elementId];
+        }
+        $elementIds = $this->request->getQueryParam('elementIds');
+        if ($elementIds) {
+            $ids = $elementIds;
+        }
+
+        if (empty($ids)) {
+            throw new HttpException(400, 'required ids are missing');
+        }
+
+
+        $handledLayouts = [];
+
         $data = [];
-        if ($element->getFieldLayout()) {
-            foreach ($element->getFieldLayout()->getTabs() as $tab) {
+        foreach ($this->getElementsByIds($ids) as $element) {
+            $layout = $element->getFieldLayout();
+            if (!$layout) {
+                continue;
+            }
+
+            if (\in_array($layout->id, $handledLayouts, true)) {
+                continue;
+            }
+            $handledLayouts[] = $layout->id;
+
+            foreach ($layout->getTabs() as $tab) {
                 $d = [
                     'tab'    => $tab->name,
                     'fields' => []
@@ -159,8 +188,8 @@ class SeederController extends Controller
 
         return $this->asCpScreen()
             ->contentTemplate('element-seeder/generateContent.twig', [
-                'elementId' => $element->id,
-                'fieldData' => $data,
+                'elementIds' => $ids,
+                'fieldData'  => $data,
             ]);
     }
 
@@ -181,8 +210,8 @@ class SeederController extends Controller
     public function actionGenerateContent(): Response
     {
         $this->requirePostRequest();
-        $elementId = $this->request->getBodyParam('elementId');
-        $element = Craft::$app->getElements()->getElementById($elementId);
+        $elementIds = $this->request->getBodyParam('elementIds');
+        $elements = $this->getElementsByIds($elementIds);
 
         $seeder = Seeder::$plugin->getSeeder();
 
@@ -193,9 +222,20 @@ class SeederController extends Controller
                 $fieldHandles[] = $handle;
             }
         }
-        $seeder->populateFields($element, $fieldHandles);
-        if (!\Craft::$app->getElements()->saveElement($element)) {
-            return $this->asModelFailure($element, 'Could not save Element due to validation errors');
+
+        $transaction = Craft::$app->getDb()->beginTransaction();
+        $elementService = Craft::$app->getElements();
+        try {
+            foreach ($elements as $element) {
+                $seeder->populateFields($element, $fieldHandles);
+                if (!$elementService->saveElement($element)) {
+                    throw new ElementException($element, 'Could not save element due to validation errors');
+                }
+            }
+            $transaction->commit();
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            throw $throwable;
         }
 
         return $this->asSuccess('Content generated successfully');
@@ -256,20 +296,7 @@ class SeederController extends Controller
                     $nr = $blockTypeConfig['number'] ?? null;
                     if ($nr) {
                         for ($x = 0; $x < $nr; $x++) {
-                            // just add random blocks
-                            $f = [];
-                            foreach ($entryType->getFieldLayout()->getCustomFields() as $blockTypeField) {
-                                $v = $seeder->getFieldData($blockTypeField);
-                                if ($v) {
-                                    $f[$blockTypeField->handle] = $v;
-                                }
-                            }
-
-                            $fieldValue['new:' . $i] = [
-                                'type'   => $entryType->handle,
-                                'title'  => Seeder::$plugin->fields->Title(),
-                                'fields' => $f
-                            ];
+                            $fieldValue['new' . $i] = $seeder->getSerializedEntryData($entryType);
                             $i++;
                         }
                     }
@@ -354,6 +381,7 @@ class SeederController extends Controller
 
             $fieldValue['new' . $i] = [
                 'type'   => $blockType->handle,
+                'title'  => $blockType->hasTitleField ? Seeder::$plugin->fields->Title() : null,
                 'fields' => $f
             ];
             $i++;
@@ -384,5 +412,28 @@ class SeederController extends Controller
                 yield [$element, ...$combination];
             }
         }
+    }
+
+    /**
+     * getElementsByIds
+     *
+     * @param array $ids
+     *
+     * @return \craft\base\ElementInterface[]
+     * @author Robin Schambach
+     * @since  09.07.2024
+     */
+    protected function getElementsByIds(array $ids): array
+    {
+        // we always use the same element type
+        $class = (new Query())
+            ->select(['type'])
+            ->from([Table::ELEMENTS])
+            ->where(['id' => $ids[0]])
+            ->scalar();
+
+        $query = Craft::$app->getElements()->createElementQuery($class);
+
+        return $query->status(null)->id($ids)->all();
     }
 }

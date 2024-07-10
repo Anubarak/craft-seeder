@@ -88,3 +88,31 @@ Would create a custom callback while seeding fields for entries in the section `
 `date`, `date2` and `text`. 
 Text would call the `Faker` function `$faker->text` and `date` and `date2` would call the callback function in order to 
 populate fields with custom conditions
+
+## Populate Elements via CP
+
+### Matrix with unique Value
+
+When an entry has a matrix field you can populate these matrix fields with blocks or with unique values in case their field layout allows it.
+For example when a block has a Dropdown field with 3 options and a Lightswitch field (with 2 options) you can generate 6 unique value combinations.
+In that case it will automatically create 6 blocks with each combination. Otherwise it will create the number of blocks set in the number field
+
+![seed-matrix-1.png](resources/seed-matrix-1.png)
+
+![seed-matrix-2.png](resources/seed-matrix-2.png)
+
+### Populate fields
+
+Another option is to seed content in general.
+
+![seed-content-1.png](resources/seed-content-1.png)
+
+You can choose which fields should be populated individually and Craft will seed it
+
+![seed-content-2.png](resources/seed-content-2.png)
+
+### Populate multiple elements
+
+The same can be done with multiple elements via element index
+
+![seed-element-index.png](resources/seed-element-index.png)

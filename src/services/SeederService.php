@@ -40,6 +40,7 @@ use craft\fields\PlainText;
 use craft\fields\RadioButtons;
 use craft\fields\Table;
 use craft\fields\Url;
+use craft\models\EntryType;
 use Faker\Generator;
 use Illuminate\Support\Collection;
 
@@ -267,5 +268,37 @@ class SeederService extends Component
         }
 
         return $this->fieldInstances[$class];
+    }
+
+    /**
+     * getSerializedEntryData
+     *
+     * @param \craft\models\EntryType $entryType
+     *
+     * @return array
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
+     * @author Robin Schambach
+     * @since  09.07.2024
+     */
+    public function getSerializedEntryData(EntryType $entryType): array
+    {
+        $fieldValues = [];
+        foreach ($entryType->getFieldLayout()?->getCustomFields() as $field) {
+            try {
+                $value = $this->getFieldData($field);
+            } catch (FieldNotFoundException $exception) {
+                $value = null;
+            }
+            if ($value) {
+                $fieldValues[$field->handle] = $value;
+            }
+        }
+
+        return [
+            'type'   => $entryType->handle,
+            'title'  => $entryType->hasTitleField ? Seeder::$plugin->fields->Title() : null,
+            'fields' => $fieldValues
+        ];
     }
 }

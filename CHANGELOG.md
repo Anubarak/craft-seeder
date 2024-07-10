@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+## 5.0.0.2 - 2024-07-10
+
+### added
+
+- added a new bulk-populate option from ElementIndex-Pages
+
 ## 5.0.0.1 - 2024-07-08
 
 ### added 

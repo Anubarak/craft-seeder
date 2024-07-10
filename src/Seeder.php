@@ -3,6 +3,7 @@
 
 namespace anubarak\seeder;
 
+use anubarak\seeder\elements\actions\PopulateAction;
 use anubarak\seeder\models\Settings;
 use anubarak\seeder\services\Assets;
 use anubarak\seeder\services\Entries;
@@ -16,8 +17,10 @@ use anubarak\seeder\services\fields\Fields as FieldsService;
 use anubarak\seeder\web\assets\cp\SeederAssetBundle;
 use craft\base\Element;
 use craft\base\Plugin;
+use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\events\DefineHtmlEvent;
+use craft\events\RegisterElementActionsEvent;
 use craft\fields\Matrix;
 use craft\helpers\Html;
 use craft\web\UrlManager;
@@ -28,12 +31,12 @@ use yii\base\Event;
  *
  * @package   Seeder
  * @since     1.0.0
- * @property  SeederService     seeder
- * @property  WeederService     weeder
- * @property  EntriesService    entries
- * @property  UsersService      users
- * @property  FieldsService     fields
- * @property  Settings          $settings
+ * @property  SeederService  seeder
+ * @property  WeederService  weeder
+ * @property  EntriesService entries
+ * @property  UsersService   users
+ * @property  FieldsService  fields
+ * @property  Settings       $settings
  * @method    Settings getSettings()
  */
 class Seeder extends Plugin
@@ -82,12 +85,12 @@ class Seeder extends Plugin
         self::$plugin = $this;
 
         $this->components = [
-            'seeder'     => SeederService::class,
-            'weeder'     => WeederService::class,
-            'entries'    => Entries::class,
-            'users'      => Users::class,
-            'fields'     => Fields::class,
-            'assets'     => Assets::class,
+            'seeder'  => SeederService::class,
+            'weeder'  => WeederService::class,
+            'entries' => Entries::class,
+            'users'   => Users::class,
+            'fields'  => Fields::class,
+            'assets'  => Assets::class,
         ];
 
         Event::on(
@@ -134,9 +137,9 @@ class Seeder extends Plugin
                 $div = Html::tag('div', '', [
                     'data-icon' => 'wand-magic-sparkles'
                 ]);
-                $content = Html::tag('button', $div. 'Seed Content', [
-                    'type' => 'button',
-                    'data' => [
+                $content = Html::tag('button', $div . 'Seed Content', [
+                    'type'  => 'button',
+                    'data'  => [
                         'element-id' => $event->sender->id
                     ],
                     'class' => [
@@ -149,10 +152,10 @@ class Seeder extends Plugin
                     $div = Html::tag('div', '', [
                         'data-icon' => 'wand-magic-sparkles'
                     ]);
-                    $content .= Html::tag('button', $div. 'Seed Matrix', [
+                    $content .= Html::tag('button', $div . 'Seed Matrix', [
                         'type' => 'button',
 
-                        'data' => [
+                        'data'  => [
                             'element-id' => $event->sender->id
                         ],
                         'class' => [
@@ -162,13 +165,28 @@ class Seeder extends Plugin
                     ]);
                 }
 
-                $outerDiv = Html::tag('div', $content , [
+                $outerDiv = Html::tag('div', $content, [
                     'class' => [
                         'flex'
                     ]
                 ]);
                 $event->html = $outerDiv;
+            }
+        );
 
+
+        Event::on(
+            Element::class,
+            Element::EVENT_REGISTER_ACTIONS,
+            static function(RegisterElementActionsEvent $event) {
+                if(!\Craft::$app->getConfig()->getGeneral()->devMode){
+                    return;
+                }
+
+                if(!\Craft::$app->getUser()->getIsAdmin()){
+                    return;
+                }
+                $event->actions[] = PopulateAction::class;
             }
         );
     }

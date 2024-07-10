@@ -10,10 +10,13 @@
  */
 
 namespace anubarak\seeder\services\fields;
+
 use anubarak\seeder\Seeder;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\elements\Entry;
+use craft\models\EntryType;
+use Illuminate\Support\Collection;
 
 /**
  * Class Matrix
@@ -30,12 +33,15 @@ class Matrix extends BaseField
     public function generate(\craft\fields\Matrix|FieldInterface $field, ElementInterface $element = null)
     {
         $types = $field->getEntryTypes();
+        $typeCollection = Collection::make($field->getEntryTypes());
 
         $typeIds = [];
         $types = array_map(
-            static function ($type) {
+            static function($type) {
                 return $type->id;
-            }, $types);
+            },
+            $types
+        );
 
         if (Seeder::getInstance()->getSettings()->eachMatrixBlock) {
             $blockCount = count($types);
@@ -44,29 +50,43 @@ class Matrix extends BaseField
             }
             shuffle($typeIds);
         } else {
-            $blockCount = random_int(!empty($field->minBlocks) ? $field->minBlocks : 1, !empty($field->maxBlocks) ? $field->maxBlocks : 6);
+            $blockCount = random_int(
+                !empty($field->minBlocks) ? $field->minBlocks : 1,
+                !empty($field->maxBlocks) ? $field->maxBlocks : 6
+            );
             for ($x = 1; $x <= $blockCount; $x++) {
                 $typeIds[] = $types[array_rand($types, 1)];
             }
         }
 
-        $elements = \Craft::$app->getElements();
-        foreach ($typeIds as $typeId) {
-            $matrixBlock = new Entry();
-            $matrixBlock->setTypeId($typeId);
-            $matrixBlock->fieldId = $field->id;
-            if($element){
-                $matrixBlock->ownerId = $element->id;
-            }
+        $ids = $element ? $element->getFieldValue($field->handle)->ids() : [];
+        $entries = [];
 
-            if($matrixBlock->getType()->hasTitleField){
-                $matrixBlock->title =  Seeder::$plugin->fields->Title();
-            }
-            $elements->saveElement($matrixBlock);
-            $matrixBlock = Seeder::$plugin->seeder->populateFields($matrixBlock);
-            $elements->saveElement($matrixBlock);
+        $seeder = Seeder::$plugin->getSeeder();
+        foreach ($typeIds as $i => $typeId) {
+            /** @var EntryType $realType */
+            $realType = $typeCollection->where(fn(EntryType $type) => $type->id === $typeId)->first();
+            $ids[] = $newId = 'new' . ($i+1);
+            $entries[$newId] = $seeder->getSerializedEntryData($realType);
+
+            //            $matrixBlock = new Entry();
+            //            $matrixBlock->setTypeId($typeId);
+            //            $matrixBlock->fieldId = $field->id;
+            //            if($element){
+            //                $matrixBlock->ownerId = $element->id;
+            //            }
+            //
+            //            if($matrixBlock->getType()->hasTitleField){
+            //                $matrixBlock->title =  Seeder::$plugin->fields->Title();
+            //            }
+            //            $elements->saveElement($matrixBlock);
+            //            $matrixBlock = Seeder::$plugin->seeder->populateFields($matrixBlock);
+            //            $elements->saveElement($matrixBlock);
         }
 
-        return null;
+        return [
+            'sortOrder' => $ids,
+            'entries'   => $entries
+        ];
     }
 }
