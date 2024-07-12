@@ -10,6 +10,7 @@ use anubarak\seeder\services\Entries;
 use anubarak\seeder\services\fields\Fields;
 use anubarak\seeder\services\SeederService;
 use anubarak\seeder\services\Entries as EntriesService;
+use anubarak\seeder\services\UniqueFields;
 use anubarak\seeder\services\Users;
 use anubarak\seeder\services\Weeder as WeederService;
 use anubarak\seeder\services\Users as UsersService;
@@ -85,12 +86,13 @@ class Seeder extends Plugin
         self::$plugin = $this;
 
         $this->components = [
-            'seeder'  => SeederService::class,
-            'weeder'  => WeederService::class,
-            'entries' => Entries::class,
-            'users'   => Users::class,
-            'fields'  => Fields::class,
-            'assets'  => Assets::class,
+            'seeder'            => SeederService::class,
+            'weeder'            => WeederService::class,
+            'entries'           => Entries::class,
+            'users'             => Users::class,
+            'fields'            => Fields::class,
+            'assets'            => Assets::class,
+            UniqueFields::class => UniqueFields::class
         ];
 
         Event::on(
@@ -179,11 +181,11 @@ class Seeder extends Plugin
             Element::class,
             Element::EVENT_REGISTER_ACTIONS,
             static function(RegisterElementActionsEvent $event) {
-                if(!\Craft::$app->getConfig()->getGeneral()->devMode){
+                if (!\Craft::$app->getConfig()->getGeneral()->devMode) {
                     return;
                 }
 
-                if(!\Craft::$app->getUser()->getIsAdmin()){
+                if (!\Craft::$app->getUser()->getIsAdmin()) {
                     return;
                 }
                 $event->actions[] = PopulateAction::class;

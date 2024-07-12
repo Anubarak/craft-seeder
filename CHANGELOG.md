@@ -1,5 +1,12 @@
 # Craft Seeder Changelog
 
+## 5.0.0.3 - 2024-07-12
+
+### added
+
+- enhance unique field handling
+- added an event to register unique fields
+
 ## 5.0.0.2 - 2024-07-10
 
 ### added

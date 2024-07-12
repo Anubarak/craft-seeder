@@ -3,16 +3,27 @@
 <div class="seeder-container">
     <input type="hidden" name="action" value="element-seeder/seeder/generate-matrix">
     <input type="hidden" name="elementId" value="{{ elementId }}">
+
+    <div class="field">
+        {{ forms.textField({
+            label: "Anzahl global",
+            class: 'unique-global',
+            type: 'number',
+            value: 0,
+        }) }}
+    </div>
+
     {% for config in matrixFields %}
         <div class="field">
             <h3>{{ config.field.name }}</h3>
             {% for configBlock in config.blocks %}
                 <h4>{{ configBlock.block.name }}</h4>
-
-                {% for field in configBlock.fields %}
+                {% for definition in configBlock.fields %}
+                    {% set field = definition.field %}
                     <div class="field">
                         {{ forms.lightswitchField({
-                            label: field.name,
+                            label: definition.field.name,
+                            instructions: definition.description ?? '',
                             id: 'deleteMessageOnSourceDelete',
                             name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][fields][#{field.id}]",
                             on: false
@@ -25,21 +36,12 @@
                         label: "Alternativ, anzahl",
                         name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][number]",
                         type: 'number',
-                        value: 5,
+                        value: 0,
                     }) }}
                 </div>
             {% endfor %}
         </div>
     {% endfor %}
-
-    <div class="field">
-        {{ forms.textField({
-            label: "Anzahl global",
-            class: 'unique-global',
-            type: 'number',
-            value: 5,
-        }) }}
-    </div>
 </div>
 
 

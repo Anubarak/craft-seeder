@@ -14,14 +14,17 @@ use anubarak\seeder\records\SeederAssetRecord;
 use anubarak\seeder\records\SeederEntryRecord;
 use anubarak\seeder\records\SeederUserRecord;
 use anubarak\seeder\Seeder;
+use anubarak\seeder\services\UniqueFields;
 use Craft;
 use craft\db\Query;
 use craft\db\Table;
 use craft\errors\ElementException;
 use craft\fieldlayoutelements\CustomField;
 use craft\fields\BaseOptionsField;
+use craft\fields\BaseRelationField;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
+use craft\fields\PlainText;
 use craft\models\EntryType;
 use craft\web\Controller;
 use yii\web\HttpException;
@@ -97,18 +100,23 @@ class SeederController extends Controller
      * @author Robin Schambach
      * @since  20/12/2023
      */
-    public function actionElementMatrixModal(): Response
+    public function actionElementMatrixModal(UniqueFields $uniqueService): Response
     {
         $elementId = $this->request->getQueryParam('elementId');
         $element = Craft::$app->getElements()->getElementById($elementId);
         $matrixFields = [];
+
         foreach ($element->getFieldLayout()?->getCustomFields() as $field) {
             if ($field instanceof Matrix) {
                 foreach ($field->getEntryTypes() as $entryType) {
                     $subFields = [];
                     foreach ($entryType->getFieldLayout()->getCustomFields() as $entryTypeField) {
-                        if ($entryTypeField instanceof BaseOptionsField || $entryTypeField instanceof Lightswitch) {
-                            $subFields[] = $entryTypeField;
+                        $uniqueField = $uniqueService->getUniqueFieldByType($entryTypeField::class);
+                        if ($uniqueField) {
+                            $subFields[] = [
+                                'field'       => $entryTypeField,
+                                'description' => $uniqueField->getDescription($entryTypeField)
+                            ];
                         }
                     }
 
@@ -138,6 +146,7 @@ class SeederController extends Controller
      * actionElementContentModal
      *
      * @return \yii\web\Response
+     * @throws \yii\web\HttpException
      * @author Robin Schambach
      * @since  08.07.2024
      */
@@ -256,7 +265,7 @@ class SeederController extends Controller
      * @author Robin Schambach
      * @since  19/12/2023
      */
-    public function actionGenerateMatrix(): Response
+    public function actionGenerateMatrix(UniqueFields $uniqueService): Response
     {
         $this->requirePostRequest();
         $elementId = $this->request->getBodyParam('elementId');
@@ -287,7 +296,7 @@ class SeederController extends Controller
                 }
 
                 if ($fields) {
-                    $uniqueBlocks = $this->createUniqueBlocks($entryType, $fields, $i);
+                    $uniqueBlocks = $this->createUniqueBlocks($entryType, $fields, $uniqueService, $i);
                     foreach ($uniqueBlocks as $key => $block) {
                         $fieldValue[$key] = $block;
                     }
@@ -335,25 +344,14 @@ class SeederController extends Controller
      * @author Robin Schambach
      * @since  20/12/2023
      */
-    public function createUniqueBlocks(EntryType $blockType, array $fields, &$i): array
+    public function createUniqueBlocks(EntryType $blockType, array $fields, UniqueFields $uniqueFields, &$i): array
     {
         $uniques = [];
         foreach ($fields as $field) {
-            switch (true) {
-                case $field instanceof Lightswitch:
-                    $uniques[$field->handle] = [
-                        true,
-                        false
-                    ];
-                    break;
-                case $field instanceof BaseOptionsField:
-                    $options = [];
-                    foreach ($field->options as $option) {
-                        $options[] = $option['value'];
-                    }
 
-                    $uniques[$field->handle] = $options;
-                    break;
+            $uniqueField = $uniqueFields->getUniqueFieldByType($field::class);
+            if($uniqueField !== null){
+                $uniques[$field->handle] = $uniqueField->getValues($field);
             }
         }
 
@@ -363,13 +361,15 @@ class SeederController extends Controller
         foreach ($allCombinations as $key => $combination) {
             $f = [];
             foreach ($fields as $j => $field) {
-                $f[$field->handle] = $combination[$j];
+                $v = is_callable($combination[$j]) ? $combination[$j]() : $combination[$j];
+
+                $f[$field->handle] = $v;
             }
 
             // add the rest of the fields
             foreach ($blockType->getFieldLayout()->getCustomFields() as $customField) {
                 // skip if it is already there
-                if (isset($f[$customField->handle])) {
+                if (array_key_exists($customField->handle, $f)) {
                     continue;
                 }
 

@@ -116,3 +116,97 @@ You can choose which fields should be populated individually and Craft will seed
 The same can be done with multiple elements via element index
 
 ![seed-element-index.png](resources/seed-element-index.png)
+
+## Events
+
+### Register Field Type Event
+
+to include custom fields, you can use the `anubarak\seeder\events\RegisterFieldTypeEvent` event.
+
+```php
+\yii\base\Event::on(
+    \anubarak\seeder\services\SeederService::class,
+    \anubarak\seeder\services\SeederService::REGISTER_FIELD_TYPES,
+    static function(\anubarak\seeder\events\RegisterFieldTypeEvent $event){
+        $event->types['my\field\Class'] = MyCustomField::class;
+    }
+);
+```
+My Custom field could then look like the following
+```php
+use craft\base\ElementInterface;
+use craft\base\FieldInterface;
+use anubarak\seeder\services\fields\BaseField
+
+class PlainText extends BaseField
+{
+    /**
+     * @inheritDoc
+     */
+    public function generate(\craft\fields\PlainText|FieldInterface $field, ElementInterface $element = null)
+    {
+        if(!$field->multiline){
+            return $this->factory->text($field->charLimit ?: 200);
+        }
+
+        return $this->factory->realText($field->charLimit ?: 200);
+    }
+}
+```
+
+### Register Unique Field Event
+
+To register a unique field that should be able to the unique matrix fields
+
+```php
+\yii\base\Event::on(
+    \anubarak\seeder\services\UniqueFields::class,
+    \anubarak\seeder\services\UniqueFields::EVENT_REGISTER_UNIQUE_FIELDS,
+    static function(\anubarak\seeder\events\RegisterUniqueFieldEvent $event){
+        $event->fields[] = MyCustomUniqueField::class;
+    }
+);
+```
+```php
+class DropdownUniqueField implements UniqueFieldInterface
+{
+    /**
+     * @param \craft\fields\BaseOptionsField $field
+     *
+     * @inheritDoc
+     */
+    public function getDescription(Field $field): string
+    {
+        $options = [];
+        foreach ($field->options as $option) {
+            $options[] = '<code>' . $option['value'] . '</code>';
+        }
+
+        return 'Options: ' . join(' | ', $options);
+    }
+
+    /**
+     * @param BaseOptionsField $field
+     *
+     * @inheritDoc
+     */
+    public function getValues(Field $field): array
+    {
+        $options = [];
+        foreach ($field->options as $option) {
+            $options[] = $option['value'];
+        }
+
+        return $options;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getFieldClass(): string
+    {
+        return BaseOptionsField::class;
+    }
+}
+```
+You can take a look at the existing unique Fields

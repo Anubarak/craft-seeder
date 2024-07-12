@@ -90,6 +90,7 @@ class SeederService extends Component
 
     /**
      * @param ElementInterface $element
+     * @param array            $fieldHandles
      *
      * @return \craft\base\ElementInterface
      * @throws \yii\base\ExitException
@@ -119,7 +120,7 @@ class SeederService extends Component
             } catch (FieldNotFoundException $e) {
                 if (Seeder::$plugin->getSettings()->debug) {
                     Craft::dd($e);
-                } else {
+                } elseif (Craft::$app->getRequest()->getIsConsoleRequest()) {
                     echo 'Fieldtype not supported:' . get_class($field) . "\n";
                 }
             }
