@@ -4,6 +4,7 @@
     <input type="hidden" name="action" value="element-seeder/seeder/generate-matrix">
     <input type="hidden" name="elementId" value="{{ elementId }}">
 
+
     <div class="field">
         {{ forms.textField({
             label: "Anzahl global",
@@ -13,43 +14,86 @@
         }) }}
     </div>
 
-    {% for config in matrixFields %}
-        <div class="field">
-            <h3>{{ config.field.name }}</h3>
-            {% for configBlock in config.blocks %}
-                <h4>{{ configBlock.block.name }}</h4>
-                {% for definition in configBlock.fields %}
-                    {% set field = definition.field %}
-                    <div class="field">
-                        {{ forms.lightswitchField({
-                            label: definition.field.name,
-                            instructions: definition.description ?? '',
-                            id: 'deleteMessageOnSourceDelete',
-                            name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][fields][#{field.id}]",
-                            on: false
-                        }) }}
-                    </div>
-                {% endfor %}
 
-                <div class="field">
-                    {{ forms.textField({
-                        label: "Alternativ, anzahl",
-                        name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][number]",
-                        type: 'number',
-                        value: 0,
-                    }) }}
-                </div>
-            {% endfor %}
+    {% for i, config in matrixFields %}
+        <div class="update">
+            <div class="update-header">
+                <div class="readable left"><h2>{{ config.field.name }}</h2></div>
+            </div>
+            <div class="readable">
+                {% for configBlock in config.blocks %}
+                    {% set paneContent %}
+                        {% for definition in configBlock.fields %}
+                            {% set field = definition.field %}
+                            <div class="field">
+                                {{ forms.lightswitchField({
+                                    label: definition.field.name,
+                                    instructions: definition.description ?? '',
+                                    id: 'deleteMessageOnSourceDelete',
+                                    name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][fields][#{field.id}]",
+                                    on: false
+                                }) }}
+                            </div>
+                        {% endfor %}
+
+                        <div class="field">
+                            {{ forms.textField({
+                                label: "Alternativ, anzahl",
+                                name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][number]",
+                                type: 'number',
+                                value: 0,
+                            }) }}
+                        </div>
+                    {% endset %}
+                    {% include 'element-seeder/pane.twig' with {
+                        content: paneContent,
+                        headline: configBlock.block.name
+                    } %}
+                {% endfor %}
+            </div>
         </div>
     {% endfor %}
+
+
+    {#    {% for config in matrixFields %} #}
+    {#        <div class="field"> #}
+    {#            <h3>{{ config.field.name }}</h3> #}
+    {#            {% for configBlock in config.blocks %} #}
+    {#                <h4>{{ configBlock.block.name }}</h4> #}
+    {#                {% for definition in configBlock.fields %} #}
+    {#                    {% set field = definition.field %} #}
+    {#                    <div class="field"> #}
+    {#                        {{ forms.lightswitchField({ #}
+    {#                            label: definition.field.name, #}
+    {#                            instructions: definition.description ?? '', #}
+    {#                            id: 'deleteMessageOnSourceDelete', #}
+    {#                            name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][fields][#{field.id}]", #}
+    {#                            on: false #}
+    {#                        }) }} #}
+    {#                    </div> #}
+    {#                {% endfor %} #}
+
+    {#                <div class="field"> #}
+    {#                    {{ forms.textField({ #}
+    {#                        label: "Alternativ, anzahl", #}
+    {#                        name: "uniqueFields[#{config.field.id}][#{configBlock.block.id}][number]", #}
+    {#                        type: 'number', #}
+    {#                        value: 0, #}
+    {#                    }) }} #}
+    {#                </div> #}
+    {#            {% endfor %} #}
+    {#        </div> #}
+    {#    {% endfor %} #}
 </div>
 
 
 {% js %}
+(() => {
     const input = document.body.querySelector('.unique-global');
     const container = input.closest('.seeder-container');
     const numbers = container.querySelectorAll('input[type="number"]:not(.unique-global)')
     input.addEventListener('input', () => {
         numbers.forEach(el => el.value = input.value);
     });
+})();
 {% endjs %}

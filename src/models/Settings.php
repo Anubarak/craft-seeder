@@ -28,8 +28,8 @@ use craft\config\BaseConfig;
  */
 class Settings extends BaseConfig
 {
-    public $debug           = false;
-    public $eachMatrixBlock = false;
+    public bool $debug           = false;
+    public bool $eachMatrixBlock = false;
     /**
      * Config to provide additional information/options for certain fields in certain layouts/ scenarios
      * it's indexed by element type
@@ -47,13 +47,31 @@ class Settings extends BaseConfig
      *
      * @var array $fieldsConfig
      */
-    public $fieldsConfig = [];
+    public array $fieldsConfig = [];
     /**
      * The language it should use
      *
      * @var string $fakerProvider
      */
-    public $fakerProvider = 'de_DE';
+    public string $fakerProvider = 'de_DE';
+    /**
+     * chance that a not required field ends up empty
+     *
+     * @var ?float $missRate
+     */
+    public ?float $missRate = 0.20;
+
+
+
+
+
+    /**
+     * should certain fields assume the content by it's handle?
+     * For example: firstName -> should be a first name field and is populated by a first name
+     *
+     * @var bool $guessFieldContentByHandle
+     */
+    public bool $guessFieldContentByHandle = true;
 
     /**
      * fieldsConfig
@@ -64,7 +82,7 @@ class Settings extends BaseConfig
      * @author Robin Schambach
      * @since  20/12/2023
      */
-    public function fieldsConfig(array $config)
+    public function fieldsConfig(array $config): self
     {
         $this->fieldsConfig = $config;
 
@@ -80,7 +98,7 @@ class Settings extends BaseConfig
      * @author Robin Schambach
      * @since  20/12/2023
      */
-    public function setFieldsConfig(array $config)
+    public function setFieldsConfig(array $config): self
     {
         $this->fieldsConfig = $config;
 
@@ -108,5 +126,45 @@ class Settings extends BaseConfig
         $attr[] = 'fieldsConfig';
 
         return $attr;
+    }
+
+    /**
+     * @return ?float
+     */
+    public function getMissRate(): ?float
+    {
+        return $this->missRate;
+    }
+
+    /**
+     * @param ?float $missRate
+     *
+     * @return Settings
+     */
+    public function missRate(?float $missRate): Settings
+    {
+        $this->missRate = $missRate;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGuessFieldContentByHandle(): bool
+    {
+        return $this->guessFieldContentByHandle;
+    }
+
+    /**
+     * @param bool $guessFieldContentByHandle
+     *
+     * @return Settings
+     */
+    public function guessFieldContentByHandle(bool $guessFieldContentByHandle): Settings
+    {
+        $this->guessFieldContentByHandle = $guessFieldContentByHandle;
+
+        return $this;
     }
 }

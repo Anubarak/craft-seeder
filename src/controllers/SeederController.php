@@ -15,6 +15,7 @@ use anubarak\seeder\records\SeederEntryRecord;
 use anubarak\seeder\records\SeederUserRecord;
 use anubarak\seeder\Seeder;
 use anubarak\seeder\services\UniqueFields;
+use anubarak\seeder\web\assets\style\SeederStyleBundle;
 use Craft;
 use craft\db\Query;
 use craft\db\Table;
@@ -103,6 +104,7 @@ class SeederController extends Controller
     public function actionElementMatrixModal(UniqueFields $uniqueService): Response
     {
         $elementId = $this->request->getQueryParam('elementId');
+        $this->view->registerAssetBundle(SeederStyleBundle::class);
         $element = Craft::$app->getElements()->getElementById($elementId);
         $matrixFields = [];
 
@@ -153,6 +155,7 @@ class SeederController extends Controller
     public function actionElementContentModal(): Response
     {
         $ids = [];
+        $this->view->registerAssetBundle(SeederStyleBundle::class);
         $elementId = $this->request->getQueryParam('elementId');
         if ($elementId) {
             $ids = [$elementId];
@@ -169,7 +172,7 @@ class SeederController extends Controller
 
         $handledLayouts = [];
 
-        $data = [];
+        $layouts = [];
         foreach ($this->getElementsByIds($ids) as $element) {
             $layout = $element->getFieldLayout();
             if (!$layout) {
@@ -180,6 +183,7 @@ class SeederController extends Controller
                 continue;
             }
             $handledLayouts[] = $layout->id;
+            $tabData = [];
 
             foreach ($layout->getTabs() as $tab) {
                 $d = [
@@ -191,14 +195,15 @@ class SeederController extends Controller
                         $d['fields'][] = $fieldLayoutElement;
                     }
                 }
-                $data[] = $d;
+                $tabData[] = $d;
             }
+            $layouts[] = $tabData;
         }
 
         return $this->asCpScreen()
             ->contentTemplate('element-seeder/generateContent.twig', [
                 'elementIds' => $ids,
-                'fieldData'  => $data,
+                'layouts'  => $layouts,
             ]);
     }
 
@@ -333,9 +338,10 @@ class SeederController extends Controller
     /**
      * createUniqueBlocks
      *
-     * @param \craft\models\EntryType       $blockType
-     * @param array                         $fields
-     * @param                               $i
+     * @param \craft\models\EntryType                $blockType
+     * @param array                                  $fields
+     * @param \anubarak\seeder\services\UniqueFields $uniqueFields
+     * @param                                        $i
      *
      * @return array
      * @throws \craft\errors\FieldNotFoundException

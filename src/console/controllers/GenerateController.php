@@ -16,7 +16,6 @@ use anubarak\seeder\services\Users;
 use craft\helpers\Console;
 use craft\models\EntryType;
 use craft\models\Section;
-use anubarak\seeder\Seeder;
 use Craft;
 use craft\models\UserGroup;
 use Illuminate\Support\Collection;
@@ -113,7 +112,6 @@ class GenerateController extends Controller
         } else {
             $section = Craft::$app->getEntries()->getSectionByHandle($this->section);
         }
-
 
         if (!$section) {
             $this->stderr('No section found with „' . $this->section . '“' . PHP_EOL);
@@ -240,7 +238,7 @@ class GenerateController extends Controller
             $volume = Craft::$app->getVolumes()->getVolumeByHandle($this->volume);
         }
 
-        $this->ensureCount(20);
+        $this->ensureCount(50);
 
         Console::startProgress(0, $this->count);
         $assets->generate($volume, $this->count, function($done, $max) {

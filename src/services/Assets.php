@@ -52,7 +52,8 @@ class Assets extends Component
 
         $res = \Craft::createGuzzleClient()->get('https://picsum.photos/v2/list', [
             'query' => [
-                'limit' => $count
+                'limit' => $count,
+                'page'  => random_int(2, 6)
             ]
         ]);
 
@@ -60,7 +61,7 @@ class Assets extends Component
         $tmpPath = \Craft::$app->getPath()->getTempPath() . DIRECTORY_SEPARATOR;
         $seeder = Seeder::$plugin->getSeeder();
 
-        foreach ($imageData as $i => $data){
+        foreach ($imageData as $i => $data) {
             $fileName = $seeder->factory->words(3, true) . '.jpg';
             $fileNameNormalized = FileHelper::sanitizeFilename($fileName);
             $content = file_get_contents($data['download_url']);
@@ -74,14 +75,17 @@ class Assets extends Component
             $asset->avoidFilenameConflicts = true;
             $asset->setScenario(Asset::SCENARIO_CREATE);
 
-            if(!$elements->saveElement($asset)){
-                throw new ElementException($asset, 'could not save asset due to errors: ' . VarDumper::dumpAsString($asset->getErrors()));
+            if (!$elements->saveElement($asset)) {
+                throw new ElementException(
+                    $asset,
+                    'could not save asset due to errors: ' . VarDumper::dumpAsString($asset->getErrors())
+                );
             }
 
             $seeder->saveSeededAsset($asset);
 
 
-            if($cb){
+            if ($cb) {
                 $cb($i + 1, $count);
             }
         }

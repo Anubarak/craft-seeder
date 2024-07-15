@@ -11,15 +11,20 @@
 namespace anubarak\seeder\services;
 
 use anubarak\seeder\services\fields\BaseField;
+use anubarak\seeder\services\fields\FormieForm;
 use anubarak\seeder\services\fields\Html;
+use anubarak\seeder\services\fields\Hyper;
 use anubarak\seeder\services\fields\Seo;
 use anubarak\seeder\services\fields\TableMaker;
+use anubarak\seeder\services\fields\Tags;
+use anubarak\seeder\services\fields\VideoInput;
 use Craft;
 use craft\base\Component;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\elements\Asset;
 use craft\elements\Entry;
+use craft\elements\User;
 use craft\errors\FieldNotFoundException;
 use anubarak\seeder\events\RegisterFieldTypeEvent;
 use anubarak\seeder\records\SeederAssetRecord;
@@ -34,6 +39,7 @@ use craft\fields\Dropdown;
 use craft\fields\Email;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
+use craft\fields\Money;
 use craft\fields\MultiSelect;
 use craft\fields\Number;
 use craft\fields\PlainText;
@@ -41,8 +47,10 @@ use craft\fields\RadioButtons;
 use craft\fields\Table;
 use craft\fields\Url;
 use craft\models\EntryType;
+use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Support\Collection;
+use function in_array;
 
 /**
  * SeederService Service
@@ -83,7 +91,7 @@ class SeederService extends Component
     public function __construct(array $config = [])
     {
         $language = Seeder::$plugin->getSettings()->fakerProvider;
-        $this->factory = \Faker\Factory::create($language);
+        $this->factory = Factory::create($language);
 
         parent::__construct($config);
     }
@@ -93,6 +101,7 @@ class SeederService extends Component
      * @param array            $fieldHandles
      *
      * @return \craft\base\ElementInterface
+     * @throws \Random\RandomException
      * @throws \yii\base\ExitException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\base\NotSupportedException
@@ -105,10 +114,17 @@ class SeederService extends Component
             return $element;
         }
 
-        $fields = $layout->getCustomFields();
+        $missRate = Seeder::$plugin->getSettings()->getMissRate();
 
+        $fields = $layout->getCustomFields();
         foreach ($fields as $field) {
-            if (!empty($fieldHandles) && !\in_array($field->handle, $fieldHandles, true)) {
+            if (!empty($fieldHandles) && !in_array($field->handle, $fieldHandles, true)) {
+                continue;
+            }
+
+            // skip in case it is not required?
+            $fieldElement = $layout->getField($field->handle);
+            if($missRate && !$fieldElement->required && (random_int(1, 100) / 100) < $missRate){
                 continue;
             }
 
@@ -153,7 +169,7 @@ class SeederService extends Component
     /**
      * @param \craft\elements\User $user
      */
-    public function saveSeededUser($user): void
+    public function saveSeededUser(User $user): void
     {
         $record = new SeederUserRecord();
         $record->userUid = $user->uid;
@@ -173,26 +189,29 @@ class SeederService extends Component
         if ($this->registeredFieldTypes === null) {
             $event = new RegisterFieldTypeEvent([
                 'types' => [
-                    Dropdown::class                                  => \anubarak\seeder\services\fields\Dropdown::class,
-                    Lightswitch::class                               => \anubarak\seeder\services\fields\Lightswitch::class,
-                    Date::class                                      => \anubarak\seeder\services\fields\Date::class,
-                    PlainText::class                                 => \anubarak\seeder\services\fields\PlainText::class,
-                    Email::class                                     => \anubarak\seeder\services\fields\Email::class,
-                    Url::class                                       => \anubarak\seeder\services\fields\Url::class,
-                    Color::class                                     => \anubarak\seeder\services\fields\Color::class,
-                    Checkboxes::class                                => \anubarak\seeder\services\fields\Checkboxes::class,
-                    RadioButtons::class                              => \anubarak\seeder\services\fields\RadioButtons::class,
-                    MultiSelect::class                               => \anubarak\seeder\services\fields\MultiSelect::class,
-                    Table::class                                     => \anubarak\seeder\services\fields\Table::class,
+                    Money::class                                     => fields\Money::class,
+                    'secondred\\base\\fields\\VideoInputField'       => VideoInput::class,
+                    Dropdown::class                                  => fields\Dropdown::class,
+                    Lightswitch::class                               => fields\Lightswitch::class,
+                    Date::class                                      => fields\Date::class,
+                    PlainText::class                                 => fields\PlainText::class,
+                    Email::class                                     => fields\Email::class,
+                    Url::class                                       => fields\Url::class,
+                    Color::class                                     => fields\Color::class,
+                    Checkboxes::class                                => fields\Checkboxes::class,
+                    RadioButtons::class                              => fields\RadioButtons::class,
+                    MultiSelect::class                               => fields\MultiSelect::class,
+                    Table::class                                     => fields\Table::class,
                     \craft\fields\Entries::class                     => \anubarak\seeder\services\fields\Entries::class,
-                    Assets::class                                    => \anubarak\seeder\services\fields\Assets::class,
-                    Number::class                                    => \anubarak\seeder\services\fields\Number::class,
-                    Matrix::class                                    => \anubarak\seeder\services\fields\Matrix::class,
-                    \craft\fields\Tags::class                        => \anubarak\seeder\services\fields\Tags::class,
-                    'verbb\\hyper\\fields\\HyperField'               => \anubarak\seeder\services\fields\Hyper::class,
+                    Assets::class                                    => fields\Assets::class,
+                    Number::class                                    => fields\Number::class,
+                    Matrix::class                                    => fields\Matrix::class,
+                    \craft\fields\Tags::class                        => Tags::class,
+                    'verbb\\hyper\\fields\\HyperField'               => Hyper::class,
                     'craft\\htmlfield\\HtmlField'                    => Html::class,
                     'secondred\\tablemaker\\fields\\TableMakerField' => TableMaker::class,
-                    'ether\\seo\\fields\\SeoField'                   => Seo::class
+                    'ether\\seo\\fields\\SeoField'                   => Seo::class,
+                    'verbb\\formie\\fields\\Forms'                   => FormieForm::class
                 ]
             ]);
             if ($this->hasEventHandlers(self::REGISTER_FIELD_TYPES)) {

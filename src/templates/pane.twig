@@ -1,0 +1,33 @@
+{% set uid = randomString(24) %}
+
+<div class="releases">
+    <div class="pane release">
+        <h3 class="release-heading">
+            <a id="notes-{{ uid }}-trigger"
+               class="release-info fieldtoggle collapsed seed-field"
+               aria-controls="notes-{{ uid }}"
+               aria-expanded="false"
+               tabindex="0"
+               role="button">
+                            <span>
+                                {{ headline }}
+                            </span>
+            </a>
+        </h3>
+        <div id="notes-{{ uid }}"
+             role="region"
+             aria-labelledby="notes-{{ uid }}-trigger"
+             style="overflow: hidden; height: 0px;"
+             class="hidden">
+            <div class="release-notes">
+                {{ content }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% js %}
+(() => {
+        new Craft.Accordion($('#{{ ('notes-' ~ uid ~ '-trigger')|namespaceInputId }}'));
+})();
+{% endjs %}

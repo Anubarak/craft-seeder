@@ -1,0 +1,74 @@
+div.release {
+    padding: 0;
+    background-color: var(--gray-050);
+    border: 1px solid var(--hairline-color);
+    box-shadow: none;
+}
+
+
+.release .release-info.fieldtoggle:before {
+    left: 20px;
+}
+
+.release .release-info.fieldtoggle:before {
+    border-color: var(--medium-text-color);
+    top: 29px;
+}
+
+
+.update .releases .release .release-info.fieldtoggle {
+    padding-left: 44px;
+    cursor: pointer;
+}
+
+.update .releases .release .release-info {
+    border-radius: var(--large-border-radius);
+    display: flex;
+    margin: 0;
+    padding: 20px 24px;
+}
+
+.release .release-notes {
+    direction: ltr;
+    padding: 0 24px 20px;
+}
+
+.update .release-heading {
+    margin: 0;
+}
+
+.update .release-date, #content .update .release-heading {
+    font-size: 24px;
+    line-height: 24px;
+}
+
+.update .releases {
+    position: relative;
+}
+
+.update .update-header {
+    align-items: center;
+    border-bottom: 1px solid var(--hairline-color);
+    display: flex;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+}
+
+
+.update .release-date {
+    margin-left: 14px;
+}
+
+.update .release-date {
+    color: var(--light-text-color);
+    flex-grow: 1;
+}
+
+.update .release-date, #content .update .release-heading {
+    font-size: 24px;
+    line-height: 24px;
+}
+.update .releases .release .release-notes {
+    direction: ltr;
+    padding: 0 24px 20px;
+}

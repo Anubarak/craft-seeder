@@ -5,17 +5,28 @@
     <input type="hidden" name="elementIds[]" value="{{ id }}">
 {% endfor %}
 
-{% for data in fieldData %}
-    <div class="field">
-        <h2>{{ data.tab }}</h2>
-        <div>
-            {% for field in data.fields %}
-                {{ forms.lightSwitchField({
-                    label: field.label(),
-                    name: 'fields[' ~ field.attribute() ~ ']',
-                }) }}
+{% for layout in layouts %}
+    <div class="update">
+        <div class="update-header">
+            <div class="readable left">
+                <h2>Layout</h2>
+            </div>
+        </div>
+        <div class="readable">
+            {% for data in layout %}
+                {% set paneContent %}
+                    {% for field in data.fields %}
+                        {{ forms.lightSwitchField({
+                            label: field.label(),
+                            name: 'fields[' ~ field.attribute() ~ ']',
+                        }) }}
+                    {% endfor %}
+                {% endset %}
+                {% include 'element-seeder/pane.twig' with {
+                    content: paneContent,
+                    headline: data.tab
+                } %}
             {% endfor %}
         </div>
     </div>
-    <hr>
 {% endfor %}

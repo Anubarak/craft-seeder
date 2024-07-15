@@ -1,5 +1,12 @@
 # Craft Seeder Changelog
 
+## 5.0.0.4 - 2024-07-15
+
+### changed
+
+- changed styling for slideouts
+- added Money, Formie and VideoInput field
+
 ## 5.0.0.3 - 2024-07-12
 
 ### added
