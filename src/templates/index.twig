@@ -34,7 +34,7 @@
             {% for section in data.sections %}
                 <div class="checkbox-select">
                     <input type="checkbox" value="{{ section.id }}" class="all checkbox" id="{{ section.name }}"
-                           name="data[sections][]" checked="checked" >
+                           name="data[sections][]" >
                     <label for="{{ section.name }}">{{ section.name }} ({{ section.count }})</label>
                 </div>
             {% endfor %}
@@ -46,16 +46,16 @@
                 {% if data.categoryGroups is defined %}
                         <div class="checkbox-select">
                             <input type="checkbox" value="categories" class="all checkbox" id="categories"
-                                   name="data[categories]" checked="checked" >
+                                   name="data[categories]" >
                             <label for="categories">{{ 'Categories' }} ({{ data.categoryGroups.count }})</label>
                         </div>
                 {% endif %}
                 {% if data.assets is defined %}
-                <input type="checkbox" id="assets" name="data[assets][]" class="all checkbox" value="" checked="checked">
+                <input type="checkbox" id="assets" name="data[assets][]" class="all checkbox" value="">
                 <label for="assets">{{ 'Assets'|t }} ({{ data.assets.count }})</label>
                 {% endif %}
                 {% if data.users is defined %}
-                    <input type="checkbox" id="users" name="data[users][]" class="all checkbox" value="" checked="checked">
+                    <input type="checkbox" id="users" name="data[users][]" class="all checkbox" value="">
                     <label for="users">{{ 'Users'|t }} ({{ data.users.count }})</label>
                 {% endif %}
             </div>

@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+## 5.0.0.5 - 2024-07-26
+
+### changed
+
+- enhance hyper link options
+
 ## 5.0.0.4 - 2024-07-15
 
 ### changed
