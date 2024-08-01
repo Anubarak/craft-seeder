@@ -3,6 +3,7 @@
 
 namespace anubarak\seeder;
 
+use anubarak\seeder\elements\actions\NumerizeAction;
 use anubarak\seeder\elements\actions\PopulateAction;
 use anubarak\seeder\models\Settings;
 use anubarak\seeder\services\Assets;
@@ -189,6 +190,7 @@ class Seeder extends Plugin
                     return;
                 }
                 $event->actions[] = PopulateAction::class;
+                $event->actions[] = NumerizeAction::class;
             }
         );
     }

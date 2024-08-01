@@ -23,6 +23,7 @@ use craft\base\Component;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\elements\Asset;
+use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
 use craft\elements\User;
 use craft\errors\FieldNotFoundException;
@@ -124,7 +125,7 @@ class SeederService extends Component
 
             // skip in case it is not required?
             $fieldElement = $layout->getField($field->handle);
-            if($missRate && !$fieldElement->required && (random_int(1, 100) / 100) < $missRate){
+            if ($missRate && !$fieldElement->required && (random_int(1, 100) / 100) < $missRate) {
                 continue;
             }
 
@@ -320,5 +321,35 @@ class SeederService extends Component
             'title'  => $entryType->hasTitleField ? Seeder::$plugin->fields->Title() : null,
             'fields' => $fieldValues
         ];
+    }
+
+    /**
+     * numerateTitle
+     *
+     * @param \craft\elements\db\ElementQueryInterface $query
+     *
+     * @return void
+     * @throws \Random\RandomException
+     * @throws \Throwable
+     * @throws \craft\errors\ElementNotFoundException
+     * @throws \yii\base\Exception
+     * @author Robin Schambach
+     * @since  01.08.2024
+     */
+    public function numerateTitle(ElementQueryInterface $query): void
+    {
+        $elements = \Craft::$app->getElements();
+        $transaction = Craft::$app->getDb()->beginTransaction();
+
+        try {
+            foreach ($query->all() as $i => $entry) {
+                $entry->title = $i . ' ' . $this->factory->words(random_int(2, 6), true);
+                $elements->saveElement($entry, false, saveContent: false);
+            }
+            $transaction->commit();
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            throw $throwable;
+        }
     }
 }

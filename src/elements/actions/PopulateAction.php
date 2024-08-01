@@ -39,14 +39,9 @@ class PopulateAction extends ElementAction
     bulk: true,
     requireId: false,
     activate: (selectedItems, elementIndex) => {
-      console.log('selectedItems', selectedItems);
-      
       const selectedIds = selectedItems.toArray().map((item) => {
         return parseInt($(item).data('id'));
       });
-      
-      console.log('selectedIds', selectedIds);
-
        const slideOut = new Craft.CpScreenSlideout('element-seeder/seeder/element-content-modal', {
         showHeader: true,
         params: {

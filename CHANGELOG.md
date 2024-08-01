@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+## 5.0.0.6 - 2024-08-01
+
+### added
+
+- added a new `Numerize` action for elements to numerize their title for easier paginations
+
 ## 5.0.0.5 - 2024-07-26
 
 ### changed
