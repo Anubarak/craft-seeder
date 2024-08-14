@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+## 5.0.0.7 - 2024-08-14
+
+### changed
+
+- add the ability to numerize other fields than the title
+
 ## 5.0.0.6 - 2024-08-01
 
 ### added

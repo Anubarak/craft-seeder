@@ -21,9 +21,7 @@ use craft\db\Query;
 use craft\db\Table;
 use craft\errors\ElementException;
 use craft\fieldlayoutelements\CustomField;
-use craft\fields\BaseOptionsField;
-use craft\fields\BaseRelationField;
-use craft\fields\Lightswitch;
+use craft\fieldlayoutelements\TitleField;
 use craft\fields\Matrix;
 use craft\fields\PlainText;
 use craft\models\EntryType;
@@ -42,9 +40,13 @@ class SeederController extends Controller
     // =========================================================================
 
     /**
-     * @return mixed
+     * actionIndex
+     *
+     * @return \yii\web\Response
+     * @author Robin Schambach
+     * @since  14.08.2024
      */
-    public function actionIndex()
+    public function actionIndex(): Response
     {
         $data = [];
         $sections = Craft::$app->getEntries();
@@ -73,7 +75,16 @@ class SeederController extends Controller
         return $this->renderTemplate('element-seeder/index', ['data' => $data]);
     }
 
-    public function actionClean()
+    /**
+     * actionClean
+     *
+     * @return \yii\web\Response
+     * @throws \Throwable
+     * @throws \yii\web\BadRequestHttpException
+     * @author Robin Schambach
+     * @since  14.08.2024
+     */
+    public function actionClean(): Response
     {
         $data = Craft::$app->request->post('data');
         if ($data) {
@@ -204,6 +215,7 @@ class SeederController extends Controller
             ->contentTemplate('element-seeder/generateContent.twig', [
                 'elementIds' => $ids,
                 'layouts'  => $layouts,
+                'action' => 'element-seeder/seeder/generate-content',
             ]);
     }
 
@@ -335,6 +347,83 @@ class SeederController extends Controller
         return $this->asSuccess('Update erfolgreich', $uniqueFields);
     }
 
+    public function actionNumerizeContentModal(): Response
+    {
+        $ids = $this->request->getQueryParam('elementIds');
+        $this->view->registerAssetBundle(SeederStyleBundle::class);
+        $handledLayouts = [];
+        $allowedFields = [
+            PlainText::class
+        ];
+        $layouts = [];
+        foreach ($this->getElementsByIds($ids) as $element) {
+            $layout = $element->getFieldLayout();
+            if (!$layout) {
+                continue;
+            }
+
+            if (\in_array($layout->id, $handledLayouts, true)) {
+                continue;
+            }
+            $handledLayouts[] = $layout->id;
+            $tabData = [];
+
+            foreach ($layout->getTabs() as $tab) {
+                $d = [
+                    'tab'    => $tab->name,
+                    'fields' => []
+                ];
+                foreach ($tab->getElements() as $fieldLayoutElement) {
+                    if($fieldLayoutElement instanceof TitleField){
+                        $d['fields'][] = $fieldLayoutElement;
+                        continue;
+                    }
+
+                    if(!($fieldLayoutElement instanceof CustomField)){
+                        continue;
+                    }
+                    $realField = $fieldLayoutElement->getField();
+                    if(!in_array($realField::class, $allowedFields, true)){
+                        continue;
+                    }
+                    $d['fields'][] = $fieldLayoutElement;
+                }
+
+                if(!empty($d['fields'])){
+                    $tabData[] = $d;
+                }
+            }
+            $layouts[] = $tabData;
+        }
+
+        return $this->asCpScreen()
+            ->contentTemplate('element-seeder/generateContent.twig', [
+                'elementIds' => $ids,
+                'layouts'  => $layouts,
+                'action' => 'element-seeder/seeder/numerize-elements',
+            ]);
+    }
+
+    public function actionNumerizeElements()
+    {
+        $this->requirePostRequest();
+        $elementIds = $this->request->getBodyParam('elementIds');
+        $elements = $this->getElementsByIds($elementIds);
+
+        $fieldConfig = $this->request->getBodyParam('fields');
+        $fields = [];
+        foreach ($fieldConfig as $fieldId => $value) {
+            if((bool)$value){
+                $fields[] = $fieldId;
+            }
+        }
+        $fields = array_unique($fields);
+
+        Seeder::$plugin->getSeeder()->numerateElements($elements, $fields);
+
+        return $this->asSuccess('Update erfolgreich');
+    }
+
     /**
      * createUniqueBlocks
      *
@@ -440,6 +529,9 @@ class SeederController extends Controller
 
         $query = Craft::$app->getElements()->createElementQuery($class);
 
-        return $query->status(null)->id($ids)->all();
+        return $query->status(null)
+            ->id($ids)
+            ->fixedOrder()
+            ->all();
     }
 }

@@ -1,6 +1,6 @@
 {% import '_includes/forms' as forms %}
 
-<input type="hidden" name="action" value="element-seeder/seeder/generate-content">
+<input type="hidden" name="action" value="{{ action }}">
 {% for id in elementIds %}
     <input type="hidden" name="elementIds[]" value="{{ id }}">
 {% endfor %}

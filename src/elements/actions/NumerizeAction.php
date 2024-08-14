@@ -29,23 +29,65 @@ class NumerizeAction extends ElementAction
         return \Craft::t('element-seeder', 'Numerize Element(s)');
     }
 
+
+
     /**
      * @inheritdoc
      */
-    public function performAction(ElementQueryInterface $query): bool
+    public function getTriggerHtml(): ?string
     {
-        // hacky, I don't like this, but Craft will skip orderBy in case it's not the Placeholder Expression
-        // and you cannot set it back...
-        // Entry::find()->orderBy(null)
-        // will prevent our fixed order by expression ¯\_(ツ)_/¯
-        if(empty($query->orderBy)){
-            $query->orderBy([new OrderByPlaceholderExpression()]);
+        \Craft::$app->getView()->registerJsWithVars(function($actionClass) {
+            return <<<JS
+(() => {
+  new Craft.ElementActionTrigger({
+    type: $actionClass,
+    bulk: true,
+    requireId: false,
+    activate: (selectedItems, elementIndex) => {
+      const selectedIds = selectedItems.toArray().map((item) => {
+        return parseInt($(item).data('id'));
+      });
+       const slideOut = new Craft.CpScreenSlideout('element-seeder/seeder/numerize-content-modal', {
+        showHeader: true,
+        params: {
+            elementIds: selectedIds
         }
-        $query->fixedOrder();
-        Seeder::$plugin->getSeeder()->numerateTitle($query);
+    });
+       
+       slideOut.on('submit', () => {
+            elementIndex.updateElements(true);
+       })
+      
+    },
+  });
+})();
+JS;
+        }, [
+            static::class,
+        ]);
 
-        $this->setMessage('changed titles');
-
-        return true;
+        return null;
     }
+
+
+
+//    /**
+//     * @inheritdoc
+//     */
+//    public function performAction(ElementQueryInterface $query): bool
+//    {
+//        // hacky, I don't like this, but Craft will skip orderBy in case it's not the Placeholder Expression
+//        // and you cannot set it back...
+//        // Entry::find()->orderBy(null)
+//        // will prevent our fixed order by expression ¯\_(ツ)_/¯
+//        if(empty($query->orderBy)){
+//            $query->orderBy([new OrderByPlaceholderExpression()]);
+//        }
+//        $query->fixedOrder();
+//        Seeder::$plugin->getSeeder()->numerateTitle($query);
+//
+//        $this->setMessage('changed titles');
+//
+//        return true;
+//    }
 }

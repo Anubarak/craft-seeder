@@ -324,27 +324,56 @@ class SeederService extends Component
     }
 
     /**
-     * numerateTitle
+     * numerateElements
      *
-     * @param \craft\elements\db\ElementQueryInterface $query
+     * @param \craft\base\ElementInterface[] $elements
+     * @param string[]                       $config
+     * @param string                         $format
      *
      * @return void
      * @throws \Random\RandomException
      * @throws \Throwable
      * @throws \craft\errors\ElementNotFoundException
+     * @throws \craft\errors\FieldNotFoundException
      * @throws \yii\base\Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
+     * @throws \yii\db\Exception
      * @author Robin Schambach
-     * @since  01.08.2024
+     * @since  14.08.2024
      */
-    public function numerateTitle(ElementQueryInterface $query): void
+    public function numerateElements(array $elements, array $config, string $format = '{i} - {value}'): void
     {
-        $elements = \Craft::$app->getElements();
+        $elementService = \Craft::$app->getElements();
         $transaction = Craft::$app->getDb()->beginTransaction();
 
+        $formatter = \Craft::$app->getI18n();
         try {
-            foreach ($query->all() as $i => $entry) {
-                $entry->title = $i . ' ' . $this->factory->words(random_int(2, 6), true);
-                $elements->saveElement($entry, false, saveContent: false);
+            foreach ($elements as $i => $entry) {
+                $hasCustomField = false;
+                foreach ($config as $fieldHandle){
+                    if($fieldHandle === 'title'){
+                        $entry->title = $formatter->format($format, [
+                            'i' => $i,
+                            'value' => $this->factory->words(random_int(2, 6), true)
+                        ], Craft::$app->language);
+                    } else {
+                        // custom field
+                        $field = $entry->getFieldLayout()->getFieldByHandle($fieldHandle);
+                        if(!$field){
+                            continue;
+                        }
+                        $value = $formatter->format($format, [
+                            'i' => $i,
+                            'value' => $this->getFieldData($field, $entry)
+                        ], Craft::$app->language);
+
+                        $entry->setFieldValue($field->handle, $value);
+                        $hasCustomField = true;
+                    }
+                }
+
+                $elementService->saveElement($entry, false, saveContent: $hasCustomField);
             }
             $transaction->commit();
         } catch (\Throwable $throwable) {
