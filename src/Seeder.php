@@ -173,7 +173,7 @@ class Seeder extends Plugin
                         'flex'
                     ]
                 ]);
-                $event->html = $outerDiv;
+                $event->html .= $outerDiv;
             }
         );
 

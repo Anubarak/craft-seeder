@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+## 5.0.1 - 2024-12-17
+
+### changed
+
+- make sure to add HTML to the sidebar and do not overwrite HTML from other plugins
+
 ## 5.0.0.7 - 2024-08-14
 
 ### changed
