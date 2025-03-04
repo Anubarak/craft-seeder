@@ -1,5 +1,12 @@
 # Craft Seeder Changelog
 
+
+## 5.0.2 - 2025-03-04
+
+### added
+
+- added crafts Link field
+
 ## 5.0.1 - 2024-12-17
 
 ### changed

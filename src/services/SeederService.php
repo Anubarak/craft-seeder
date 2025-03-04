@@ -39,6 +39,7 @@ use craft\fields\Date;
 use craft\fields\Dropdown;
 use craft\fields\Email;
 use craft\fields\Lightswitch;
+use craft\fields\Link;
 use craft\fields\Matrix;
 use craft\fields\Money;
 use craft\fields\MultiSelect;
@@ -198,6 +199,7 @@ class SeederService extends Component
                     PlainText::class                                 => fields\PlainText::class,
                     Email::class                                     => fields\Email::class,
                     Url::class                                       => fields\Url::class,
+                    Link::class                                      => fields\CraftLink::class,
                     Color::class                                     => fields\Color::class,
                     Checkboxes::class                                => fields\Checkboxes::class,
                     RadioButtons::class                              => fields\RadioButtons::class,
@@ -351,20 +353,20 @@ class SeederService extends Component
         try {
             foreach ($elements as $i => $entry) {
                 $hasCustomField = false;
-                foreach ($config as $fieldHandle){
-                    if($fieldHandle === 'title'){
+                foreach ($config as $fieldHandle) {
+                    if ($fieldHandle === 'title') {
                         $entry->title = $formatter->format($format, [
-                            'i' => $i,
+                            'i'     => $i,
                             'value' => $this->factory->words(random_int(2, 6), true)
                         ], Craft::$app->language);
                     } else {
                         // custom field
                         $field = $entry->getFieldLayout()->getFieldByHandle($fieldHandle);
-                        if(!$field){
+                        if (!$field) {
                             continue;
                         }
                         $value = $formatter->format($format, [
-                            'i' => $i,
+                            'i'     => $i,
                             'value' => $this->getFieldData($field, $entry)
                         ], Craft::$app->language);
 

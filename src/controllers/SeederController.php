@@ -19,6 +19,7 @@ use anubarak\seeder\web\assets\style\SeederStyleBundle;
 use Craft;
 use craft\db\Query;
 use craft\db\Table;
+use craft\elements\Entry;
 use craft\errors\ElementException;
 use craft\fieldlayoutelements\CustomField;
 use craft\fieldlayoutelements\TitleField;
@@ -534,4 +535,19 @@ class SeederController extends Controller
             ->fixedOrder()
             ->all();
     }
+
+    //    public function actionTest()
+    //    {
+    //        /** @var \craft\fields\Link $field */
+    //        $field = Craft::$app->getFields()->getFieldByHandle('linkField');
+    //
+    //
+    //        $entry = Entry::findOne(5);
+    //        Seeder::$plugin->getSeeder()->populateFields($entry, ['linkField']);
+    //        $s = Craft::$app->getElements()->saveElement($entry);
+    //        echo "<pre>";
+    //        var_dump($s);
+    //        echo "</pre>";
+    //        die();
+    //    }
 }
