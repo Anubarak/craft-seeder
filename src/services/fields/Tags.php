@@ -29,7 +29,7 @@ class Tags extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Tags|FieldInterface $field, ElementInterface $element = null)
+    public function generate(\craft\fields\Tags|FieldInterface $field, ElementInterface|null $element = null)
     {
         $source = $field->sources;
         $uid = str_replace('taggroup:', '', $source);

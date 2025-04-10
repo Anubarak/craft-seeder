@@ -29,7 +29,7 @@ class Html extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(FieldInterface $field, ElementInterface $element = null)
+    public function generate(FieldInterface $field, ElementInterface|null $element = null)
     {
         return \craft\helpers\Html::tag('p', Lorem::sentences(rand(5, 20), true));
     }

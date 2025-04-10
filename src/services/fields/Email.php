@@ -26,7 +26,7 @@ class Email extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Email|FieldInterface $field, ElementInterface $element = null)
+    public function generate(\craft\fields\Email|FieldInterface $field, ElementInterface|null $element = null)
     {
         return $this->factory->email();
     }

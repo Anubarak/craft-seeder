@@ -29,7 +29,7 @@ class Entries extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Entries|FieldInterface $field, ElementInterface $element = null)
+    public function generate(\craft\fields\Entries|FieldInterface $field, ElementInterface|null $element = null)
     {
         $sources = $field->sources;
         $sectionIds = [];

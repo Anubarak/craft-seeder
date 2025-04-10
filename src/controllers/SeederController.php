@@ -323,7 +323,13 @@ class SeederController extends Controller
                     $nr = $blockTypeConfig['number'] ?? null;
                     if ($nr) {
                         for ($x = 0; $x < $nr; $x++) {
-                            $fieldValue['new' . $i] = $seeder->getSerializedEntryData($entryType);
+
+                            $e = new Entry();
+                            $e->setTypeId($entryType->getId());
+                            $e->setOwner($element);
+                            $e->fieldId = $matrixField->id;
+
+                            $fieldValue['new' . $i] = $seeder->getSerializedEntryData($entryType, $e);
                             $i++;
                         }
                     }

@@ -28,7 +28,7 @@ class FormieForm extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(FieldInterface|Forms $field, ElementInterface $element = null)
+    public function generate(FieldInterface|Forms $field, ElementInterface|null $element = null)
     {
         $limit = 2;
         if ($field->maxRelations) {

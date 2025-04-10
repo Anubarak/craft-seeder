@@ -19,7 +19,7 @@ class Color extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(FieldInterface $field, ElementInterface $element = null)
+    public function generate(FieldInterface $field, ElementInterface|null $element = null)
     {
         return $this->factory->safeHexColor;
     }

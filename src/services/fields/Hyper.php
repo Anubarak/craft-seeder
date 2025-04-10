@@ -28,7 +28,7 @@ class Hyper extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\verbb\hyper\fields\HyperField|FieldInterface $field, ElementInterface $element = null)
+    public function generate(\verbb\hyper\fields\HyperField|FieldInterface $field, ElementInterface|null $element = null)
     {
         $supported = [
             \verbb\hyper\links\Entry::class,

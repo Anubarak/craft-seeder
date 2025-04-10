@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+# 5.0.3 - - 2025-04-10
+
+### changed
+
+- during creation of matrix blocks, we now fake a parent element with the correct type in order to make it possible to avoid endless recursion
+- make nullish arguments PHP 8.4 compatible
 
 ## 5.0.2 - 2025-03-04
 

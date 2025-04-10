@@ -19,7 +19,7 @@ class VideoInput extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(FieldInterface $field, ElementInterface $element = null)
+    public function generate(FieldInterface $field, ElementInterface|null $element = null)
     {
         //        $type = $this->factory->randomElement(['youtube', 'vimeo']);
         $type = 'youtube';

@@ -241,7 +241,7 @@ class SeederService extends Component
      * @author Robin Schambach
      * @since  05.09.2019
      */
-    public function getFieldData(FieldInterface $field, ElementInterface $element = null): mixed
+    public function getFieldData(FieldInterface $field, ElementInterface|null $element = null): mixed
     {
         $class = get_class($field);
         $registeredFieldTypes = $this->getRegisteredFieldTypes();
@@ -304,12 +304,12 @@ class SeederService extends Component
      * @author Robin Schambach
      * @since  09.07.2024
      */
-    public function getSerializedEntryData(EntryType $entryType): array
+    public function getSerializedEntryData(EntryType $entryType, ElementInterface|null $element = null): array
     {
         $fieldValues = [];
         foreach ($entryType->getFieldLayout()?->getCustomFields() as $field) {
             try {
-                $value = $this->getFieldData($field);
+                $value = $this->getFieldData($field, $element);
             } catch (FieldNotFoundException $exception) {
                 $value = null;
             }

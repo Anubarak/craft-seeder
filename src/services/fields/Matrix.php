@@ -30,7 +30,7 @@ class Matrix extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Matrix|FieldInterface $field, ElementInterface $element = null)
+    public function generate(\craft\fields\Matrix|FieldInterface $field, ElementInterface|null $element = null)
     {
         $types = $field->getEntryTypes();
         $typeCollection = Collection::make($field->getEntryTypes());
@@ -67,7 +67,15 @@ class Matrix extends BaseField
             /** @var EntryType $realType */
             $realType = $typeCollection->where(fn(EntryType $type) => $type->id === $typeId)->first();
             $ids[] = $newId = 'new' . ($i+1);
-            $entries[$newId] = $seeder->getSerializedEntryData($realType);
+
+            $matrixBlock = new Entry();
+            $matrixBlock->setTypeId($typeId);
+            $matrixBlock->fieldId = $field->id;
+            if($element){
+                $matrixBlock->setOwner($element);;
+            }
+
+            $entries[$newId] = $seeder->getSerializedEntryData($realType, $matrixBlock);
 
             //            $matrixBlock = new Entry();
             //            $matrixBlock->setTypeId($typeId);

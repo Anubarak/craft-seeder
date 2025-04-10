@@ -27,7 +27,7 @@ class PlainText extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\PlainText|FieldInterface $field, ElementInterface $element = null)
+    public function generate(\craft\fields\PlainText|FieldInterface $field, ElementInterface|null $element = null)
     {
         if (Seeder::$plugin->getSettings()->isGuessFieldContentByHandle()) {
             $value = $this->guessFieldContentByHandle($field);

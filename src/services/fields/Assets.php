@@ -35,7 +35,7 @@ class Assets extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\Assets|FieldInterface $field, ElementInterface $element = null)
+    public function generate(\craft\fields\Assets|FieldInterface $field, ElementInterface|null $element = null)
     {
         $source = $field->sources;
         $volumeIds = [];

@@ -26,7 +26,7 @@ class Money extends BaseField
     /**
      * @inheritDoc
      */
-    public function generate(FieldInterface $field, ElementInterface $element = null)
+    public function generate(FieldInterface $field, ElementInterface|null $element = null)
     {
         return [
             'value'  => $this->factory->numberBetween(100, 100000),

@@ -188,5 +188,5 @@ abstract class BaseField
      * @author Robin Schambach
      * @since  19/12/2023
      */
-    public abstract function generate(FieldInterface $field, ElementInterface $element = null);
+    public abstract function generate(FieldInterface $field, ElementInterface|null $element = null);
 }

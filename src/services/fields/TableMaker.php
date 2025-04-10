@@ -21,7 +21,7 @@ class TableMaker extends BaseField
      *
      * @inheritDoc
      */
-    public function generate(FieldInterface $field, ElementInterface $element = null)
+    public function generate(FieldInterface $field, ElementInterface|null $element = null)
     {
         $colNr = $this->factory->numberBetween(3,5);
         $rowNr = $this->factory->numberBetween(5,15);
