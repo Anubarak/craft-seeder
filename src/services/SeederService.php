@@ -209,6 +209,8 @@ class SeederService extends Component
                     Assets::class                                    => fields\Assets::class,
                     Number::class                                    => fields\Number::class,
                     Matrix::class                                    => fields\Matrix::class,
+                    \craft\fields\Users::class                       => \anubarak\seeder\services\fields\Users::class,
+//                    \craft\fields\Categories::class                  => \anubarak\seeder\services\fields\Categories::class,
                     \craft\fields\Tags::class                        => Tags::class,
                     'verbb\\hyper\\fields\\HyperField'               => Hyper::class,
                     'craft\\htmlfield\\HtmlField'                    => Html::class,

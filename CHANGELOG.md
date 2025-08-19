@@ -1,5 +1,11 @@
 # Craft Seeder Changelog
 
+# 5.0.4 - - 2025-08-19
+
+### added
+
+- added Users field
+
 # 5.0.3 - - 2025-04-10
 
 ### changed
