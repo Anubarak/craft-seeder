@@ -39,7 +39,7 @@ class EntryConfig extends ElementConfig
     /**
      * @param string|null $entryType
      */
-    public function __construct(string $entryType = null, array $fieldConfig = [])
+    public function __construct(?string $entryType = null, array $fieldConfig = [])
     {
         $this->entryType = $entryType;
         $this->fieldConfig = $fieldConfig;
