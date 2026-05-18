@@ -1,7 +1,7 @@
 {
   "name": "anubarak/craft-seeder",
   "description": "Easy entries seeder for Craft CMS",
-  "version": "6.0.0-alpha.3",
+  "version": "6.0.0-alpha.4",
   "type": "craft-plugin",
   "keywords": [
     "craft",
@@ -25,10 +25,10 @@
   "extra": {
     "name": "Element Seeder",
     "handle": "element-seeder",
-    "class": "\\Anubarak\\Seeder\\SeederServiceProvider",
+    "class": "Anubarak\\Seeder\\SeederServiceProvider",
     "laravel": {
       "providers": [
-        "\\Anubarak\\Seeder\\SeederServiceProvider"
+        "Anubarak\\Seeder\\SeederServiceProvider"
       ]
     }
   },
