@@ -1,7 +1,7 @@
 {
   "name": "anubarak/craft-seeder",
   "description": "Easy entries seeder for Craft CMS",
-  "version": "6.0.0-alpha.1",
+  "version": "6.0.0-alpha.2",
   "type": "craft-plugin",
   "keywords": [
     "craft",
@@ -19,7 +19,7 @@
   },
   "autoload": {
     "psr-4": {
-      "anubarak\\seeder\\": "src/"
+      "Anubarak\\Seeder\\": "src/"
     }
   },
   "extra": {
