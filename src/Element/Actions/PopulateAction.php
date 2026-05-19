@@ -4,6 +4,7 @@ namespace Anubarak\Seeder\Element\Actions;
 
 
 use CraftCms\Cms\Element\Actions\ElementAction;
+use CraftCms\Cms\Support\Facades\HtmlStack;
 
 /**
  * Craft CMS Plugins
@@ -32,7 +33,7 @@ class PopulateAction extends ElementAction
      */
     public function getTriggerHtml(): ?string
     {
-        \Craft::$app->getView()->registerJsWithVars(function($actionClass) {
+        HtmlStack::jsWithVars(function($actionClass) {
             return <<<JS
 (() => {
   new Craft.ElementActionTrigger({
@@ -43,7 +44,7 @@ class PopulateAction extends ElementAction
       const selectedIds = selectedItems.toArray().map((item) => {
         return parseInt($(item).data('id'));
       });
-       const slideOut = new Craft.CpScreenSlideout('element-seeder/seeder/element-content-modal', {
+       const slideOut = new Craft.CpScreenSlideout('element-seeder/element-content-modal', {
         showHeader: true,
         params: {
             elementIds: selectedIds

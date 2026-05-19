@@ -10,12 +10,12 @@
 
 namespace Anubarak\Seeder\Seeder;
 
-use Anubarak\Seeder\records\SeederAssetRecord;
-use Anubarak\Seeder\records\SeederEntryRecord;
+use Anubarak\Seeder\Models\SeederAssetRecord;
+use Anubarak\Seeder\Models\SeederEntryRecord;
 use CraftCms\Cms\Asset\Elements\Asset;
 use CraftCms\Cms\Element\Elements;
 use CraftCms\Cms\Entry\Elements\Entry;
-use Anubarak\Seeder\records\SeederUserRecord;
+use Anubarak\Seeder\Models\SeederUserRecord;
 use CraftCms\Cms\Section\Sections;
 use CraftCms\Cms\User\Elements\User;
 use Illuminate\Container\Attributes\Singleton;

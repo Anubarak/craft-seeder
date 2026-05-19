@@ -10,11 +10,17 @@
 
 namespace Anubarak\Seeder\Commands;
 
-use Anubarak\Seeder\records\SeederEntryRecord;
-use Anubarak\Seeder\SeederServiceProvider;
-use Anubarak\Seeder\services\Weeder;
+use Anubarak\Seeder\Seeder\Weeder;
+use CraftCms\Cms\Asset\Elements\Asset;
+use CraftCms\Cms\Entry\Elements\Entry;
 use CraftCms\Cms\Section\Sections;
+use CraftCms\Cms\User\Elements\User;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\select;
 
 /**
  * Seeder plugin
@@ -25,15 +31,15 @@ use Illuminate\Console\Command;
  * @package   Seeder
  * @since     1.0.0
  */
-class CleanUp extends Command
+class CleanUp extends Command implements PromptsForMissingInput
 {
+    protected $signature   = 'element-seeder:clean-up {types : what should be cleaned}';
+    protected $description = 'Delete all seeded elements';
 
     public function __construct(
         private readonly Sections $sections,
-        private readonly Weeder $weeder,
-
-    )
-    {
+        private readonly Weeder   $weeder,
+    ) {
         parent::__construct();
     }
 
@@ -47,18 +53,54 @@ class CleanUp extends Command
      */
     public function handle(): int
     {
+        $types = new Collection($this->argument('types'));
+
+
+        $key = $types->search('all');
+        $all = $key !== false ? (bool)$types->pull($key) : false;
+
+        $key = $types->search('users');
+        $users = $key !== false ?  (bool)$types->pull($key) : false;
+
+        $key = $types->search('assets');
+        $assets = $key !== false ? (bool)$types->pull($key) : false;
+
         foreach ($this->sections->getAllSections()->all() as $section) {
-            $seededEntries = SeederEntryRecord::findAll([
-                'section' => $section->id
-            ]);
-            if (count($seededEntries)) {
-                SeederServiceProvider::$plugin->weeder->entries($section->id);
+
+            if ($all || $types->search($section->handle) !== false) {
+                $this->info("Clear {$section->name}");
+                $this->newLine();
+                $this->weeder->entries($section->id);
             }
         }
+        if ($assets || $all) {
+            $this->info("Clear Assets");
+            $this->newLine();
+            $this->weeder->assets();
+        }
+        if ($users || $all) {
+            $this->info("Clear Users");
+            $this->newLine();
+            $this->weeder->users();
+        }
 
-        SeederServiceProvider::$plugin->weeder->assets();
-        SeederServiceProvider::$plugin->weeder->users();
+        return self::SUCCESS;
+    }
 
-        return ExitCode::OK;
+    protected function promptForMissingArgumentsUsing(): array
+    {
+        return [
+            'types' => fn() => multiselect(
+                label: 'What should be cleaned:',
+                options: [
+                    'all'    => 'All',
+                    ... $this->sections->getAllSections()
+                        ->mapWithKeys(fn($section) => [$section->handle => $section->name])
+                        ->all(),
+                    'assets' => Asset::displayName(),
+                    'users'  => User::displayName(),
+                ],
+            ),
+        ];
     }
 }

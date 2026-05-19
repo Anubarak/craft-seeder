@@ -11,7 +11,7 @@
 namespace Anubarak\Seeder\Seeder\Generators;
 
 
-use Anubarak\Seeder\Seeder\Fields\Fields;
+use Anubarak\Seeder\Seeder\Fields;
 use Anubarak\Seeder\Seeder\Seeder;
 use CraftCms\Cms\Element\Elements;
 use CraftCms\Cms\Element\Exceptions\ElementException;
@@ -90,7 +90,6 @@ class Entries
                     $cb($current, $total);
                 }
                 $this->db->beginTransaction();
-
                 try {
                     $entry = new Entry([
                         'sectionId' => (int) $section->id,

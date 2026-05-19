@@ -21,7 +21,6 @@ use Anubarak\Seeder\Seeder\unique\RelationUniqueField;
 use Anubarak\Seeder\Seeder\unique\UniqueFieldInterface;
 use CraftCms\Cms\Field\Models\Field;
 use Illuminate\Container\Attributes\Singleton;
-use yii\base\Component;
 
 #[Singleton]
 class UniqueFields

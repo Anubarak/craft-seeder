@@ -11,13 +11,12 @@
 
 namespace Anubarak\Seeder\Seeder\Fields;
 
+use Anubarak\Seeder\Seeder\Fields;
 use CraftCms\Cms\Element\Contracts\ElementInterface;
 use CraftCms\Cms\Field\Contracts\FieldInterface;
 use CraftCms\Cms\Entry\Elements\Entry;
-use craft\helpers\Db;
 use CraftCms\Cms\Section\Sections;
 use CraftCms\Cms\Site\Sites;
-use yii\db\Expression;
 
 /**
  * Class Entries

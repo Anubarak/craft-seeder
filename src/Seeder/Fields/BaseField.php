@@ -11,6 +11,7 @@
 
 namespace Anubarak\Seeder\Seeder\Fields;
 
+use Anubarak\Seeder\Seeder\Fields;
 use Anubarak\Seeder\SeederServiceProvider;
 use CraftCms\Cms\Asset\Elements\Asset;
 use CraftCms\Cms\Element\Contracts\ElementInterface;
@@ -34,7 +35,8 @@ abstract class BaseField
     public \Faker\Generator $factory;
 
     /**
-     * @param \Faker\Generator $factory
+     * @param \Faker\Generator               $factory
+     * @param \Anubarak\Seeder\Seeder\Fields $fields
      */
     public function __construct(
         \Faker\Generator $factory,
@@ -140,8 +142,6 @@ abstract class BaseField
      *
      * @return mixed|string|null
      *
-     * @throws \yii\base\NotSupportedException
-     * @throws \yii\base\InvalidConfigException
      * @author Robin Schambach
      * @since  22.06.2021
      */
@@ -157,8 +157,6 @@ abstract class BaseField
      * @param \CraftCms\Cms\Element\Contracts\ElementInterface|null $element
      *
      * @return mixed|string
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\base\NotSupportedException
      * @author Robin Schambach
      * @since  19/12/2023
      */

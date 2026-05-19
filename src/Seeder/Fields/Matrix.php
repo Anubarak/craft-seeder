@@ -11,6 +11,7 @@
 
 namespace Anubarak\Seeder\Seeder\Fields;
 
+use Anubarak\Seeder\Seeder\Fields;
 use Anubarak\Seeder\Seeder\Seeder;
 use Anubarak\Seeder\SeederServiceProvider;
 use CraftCms\Cms\Element\Contracts\ElementInterface;

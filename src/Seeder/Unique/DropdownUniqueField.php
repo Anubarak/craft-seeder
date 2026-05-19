@@ -13,7 +13,6 @@ namespace Anubarak\Seeder\Seeder\Unique;
 
 use CraftCms\Cms\Field\BaseOptionsField;
 use CraftCms\Cms\Field\Contracts\FieldInterface;
-use CraftCms\Cms\Field\Models\Field;
 
 /**
  * Class DropdownUniqueField

@@ -60,16 +60,14 @@ readonly class Assets
     public function generate(Volume $volume, int $count, callable $cb = null): void
     {
         $folder = $this->folders->getRootFolderByVolumeId($volume->id);
-        $res = Http::create()->get('https://picsum.photos/v2/list', [
-            'query' => [
+
+        $res = Http::get('https://picsum.photos/v2/list', [
                 'limit' => $count,
                 'page'  => random_int(2, 6)
-            ]
         ]);
 
         $imageData = Json::decode($res->getBody()->getContents());
         $tmpPath = $this->path->temp() . DIRECTORY_SEPARATOR;
-
         foreach ($imageData as $i => $data) {
             $fileName = $this->seeder->factory->words(3, true) . '.jpg';
             $fileNameNormalized = File::sanitizeFilename($fileName);

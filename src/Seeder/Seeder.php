@@ -11,17 +11,16 @@
 namespace Anubarak\Seeder\Seeder;
 
 use Anubarak\Seeder\Seeder\Fields\BaseField;
-use Anubarak\Seeder\Seeder\Fields\Fields;
 use Anubarak\Seeder\SeederServiceProvider;
 use CraftCms\Cms\Asset\Elements\Asset;
 use CraftCms\Cms\Element\Contracts\ElementInterface;
 use CraftCms\Cms\Element\Elements;
 use CraftCms\Cms\Entry\Data\EntryType;
 use CraftCms\Cms\Entry\Elements\Entry;
-use Anubarak\Seeder\events\RegisterFieldTypeEvent;
-use Anubarak\Seeder\records\SeederAssetRecord;
-use Anubarak\Seeder\records\SeederEntryRecord;
-use Anubarak\Seeder\records\SeederUserRecord;
+use Anubarak\Seeder\Events\RegisterFieldTypeEvent;
+use Anubarak\Seeder\Models\SeederAssetRecord;
+use Anubarak\Seeder\Models\SeederEntryRecord;
+use Anubarak\Seeder\Models\SeederUserRecord;
 use CraftCms\Cms\Field\Assets;
 use CraftCms\Cms\Field\Checkboxes;
 use CraftCms\Cms\Field\Color;
@@ -103,9 +102,6 @@ class Seeder
      *
      * @return \CraftCms\Cms\Element\Contracts\ElementInterface
      * @throws \Random\RandomException
-     * @throws \yii\base\ExitException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\base\NotSupportedException
      */
     public function populateFields(ElementInterface $element, array $fieldHandles = []): ElementInterface
     {
@@ -272,7 +268,7 @@ class Seeder
         if (!isset($this->fieldInstances[$class])) {
             $object = app()->make($class, [
                 'factory' => $this->factory,
-                'fields'  => $this,
+                'fields'  => $this->fields,
             ]);
             $this->fieldInstances[$class] = $object;
         }
@@ -283,12 +279,10 @@ class Seeder
     /**
      * getSerializedEntryData
      *
-     * @param \craft\models\EntryType                               $entryType
+     * @param EntryType                               $entryType
      * @param \CraftCms\Cms\Element\Contracts\ElementInterface|null $element
      *
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\base\NotSupportedException
      * @author Robin Schambach
      * @since  09.07.2024
      */
@@ -323,12 +317,6 @@ class Seeder
      * @return void
      * @throws \Random\RandomException
      * @throws \Throwable
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \craft\errors\FieldNotFoundException
-     * @throws \yii\base\Exception
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\base\NotSupportedException
-     * @throws \yii\db\Exception
      * @author Robin Schambach
      * @since  14.08.2024
      */

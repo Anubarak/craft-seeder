@@ -2,9 +2,8 @@
 
 use Anubarak\Seeder\Data\EntryConfig;
 use Anubarak\Seeder\Data\FieldCallback;
-use Anubarak\Seeder\Settings;
 use CraftCms\Cms\Element\Contracts\ElementInterface;
-use craft\base\FieldInterface;
+use CraftCms\Cms\Field\Contracts\FieldInterface;
 
 return [
     'fieldsConfig' => [

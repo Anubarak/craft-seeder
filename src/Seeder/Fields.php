@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2018 Studio Espresso
  */
 
-namespace Anubarak\Seeder\Seeder\Fields;
+namespace Anubarak\Seeder\Seeder;
 
 use Anubarak\Seeder\Data\ElementConfig;
 use Anubarak\Seeder\Data\FieldCallback;
@@ -157,8 +157,6 @@ class Fields
      *
      * @return mixed|string|null
      *
-     * @throws \yii\base\NotSupportedException
-     * @throws \yii\base\InvalidConfigException
      * @author Robin Schambach
      * @since  22.06.2021
      */

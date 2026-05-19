@@ -12,8 +12,9 @@
 namespace Anubarak\Seeder\Seeder\Fields;
 
 use CraftCms\Cms\Element\Contracts\ElementInterface;
+use CraftCms\Cms\Element\ElementSources;
 use CraftCms\Cms\Field\Contracts\FieldInterface;
-use craft\helpers\ElementHelper;
+use CraftCms\Cms\Support\Typecast;
 use verbb\hyper\base\ElementLink;
 
 /**
@@ -71,7 +72,6 @@ class Hyper extends BaseField
      *
      * @return \verbb\hyper\base\Link
      * @throws \Random\RandomException
-     * @throws \yii\base\InvalidConfigException
      * @author Robin Schambach
      * @since  26.07.2024
      */
@@ -81,13 +81,12 @@ class Hyper extends BaseField
         $class = \Craft::createObject($config['type']);
         switch (true) {
             case $class instanceof ElementLink:
-                /** @var \craft\elements\db\ElementQuery $query */
                 $query = $class::elementType()::find();
                 $source = $config['sources'][0] ?? '*';
 
-                $source = ElementHelper::findSource($class::elementType(), $source);
+                $source = app(ElementSources::class)->findSource($class::elementType(), $source);
 
-                \Craft::configure($query, $source['criteria']);
+                Typecast::configure($query, $source['criteria']);
                 $element = $query->one();
                 $class->linkValue = $element?->id;
                 break;

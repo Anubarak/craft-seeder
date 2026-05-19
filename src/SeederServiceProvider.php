@@ -3,6 +3,9 @@
 
 namespace Anubarak\Seeder;
 
+use Anubarak\Seeder\Commands\CleanUp;
+use Anubarak\Seeder\Commands\Generate;
+use Anubarak\Seeder\Commands\Populate;
 use Anubarak\Seeder\Listeners\MetaFieldHtml;
 use Anubarak\Seeder\Listeners\RegisterElementActions;
 use Craft;
@@ -36,9 +39,14 @@ class SeederServiceProvider extends Plugin
         __DIR__ . '/../resources/js/seeder.js' => 'js/seeder.js',
     ];
     protected array $styles       = [
-        __DIR__ . '/../resources/css/seeder.js' => 'css/seeder.css',
+        __DIR__ . '/../resources/css/seeder.css' => 'css/seeder.css',
     ];
 
+
+    protected array $commands = [
+        CleanUp::class,
+        Generate::class,
+    ];
     /**
      * Creates and returns the model used to store the plugin’s settings.
      *

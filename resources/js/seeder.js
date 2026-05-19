@@ -1,6 +1,6 @@
 (() => {
     const handler = (event) => {
-        new Craft.CpScreenSlideout('element-seeder/seeder/element-matrix-modal', {
+        new Craft.CpScreenSlideout('element-seeder/element-matrix-modal', {
             showHeader: true,
             params: {
                 elementId: event.currentTarget.dataset.elementId
@@ -15,7 +15,7 @@
 
 
     const seedContentHandler = (event) => {
-        new Craft.CpScreenSlideout('element-seeder/seeder/element-content-modal', {
+        new Craft.CpScreenSlideout('element-seeder/element-content-modal', {
             showHeader: true,
             params: {
                 elementId: event.currentTarget.dataset.elementId

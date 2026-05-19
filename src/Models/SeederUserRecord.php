@@ -1,6 +1,6 @@
 <?php
 
-namespace Anubarak\Seeder\records;
+namespace Anubarak\Seeder\Models;
 
 use CraftCms\Cms\Shared\BaseModel;
 use CraftCms\Cms\Shared\Concerns\HasUid;
@@ -8,7 +8,7 @@ use CraftCms\Cms\Shared\Concerns\HasUid;
 /**
  * Class SeederUserRecord
  *
- * @package Anubarak\Seeder\records
+ * @package Anubarak\Seeder\Models
  * @since   15.07.2024
  * @author  by Robin Schambach
  * @property string $userUid

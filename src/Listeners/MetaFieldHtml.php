@@ -2,12 +2,14 @@
 
 namespace Anubarak\Seeder\Listeners;
 
+use CraftCms\Cms\Cms;
 use CraftCms\Cms\Config\GeneralConfig;
 use CraftCms\Cms\Element\Events\ElementMetaFieldsHtmlResolving;
 use CraftCms\Cms\Entry\Elements\Entry;
 use CraftCms\Cms\Field\Matrix;
 use CraftCms\Cms\Support\Html;
 use Illuminate\Auth\AuthManager;
+use Illuminate\Support\Facades\App;
 
 /**
  * MetaFieldHtml
@@ -19,14 +21,13 @@ use Illuminate\Auth\AuthManager;
 class MetaFieldHtml
 {
     public function __construct(
-        private readonly GeneralConfig $config,
         private readonly AuthManager   $auth
     ) {
     }
 
     public function handle(ElementMetaFieldsHtmlResolving $event)
     {
-        if (!$this->config->devMode) {
+        if (!App::hasDebugModeEnabled()) {
             return;
         }
 

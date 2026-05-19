@@ -17,6 +17,7 @@ use Anubarak\Seeder\SeederServiceProvider;
 use Craft;
 use CraftCms\Cms\Element\Element;
 use CraftCms\Cms\Element\Elements;
+use CraftCms\Cms\Element\Validation\ElementRules;
 use CraftCms\Cms\User\Data\UserGroup;
 use CraftCms\Cms\User\Elements\User;
 use Illuminate\Container\Attributes\Singleton;
@@ -45,9 +46,6 @@ class Users
 
     /**
      * @param UserGroup[] $userGroups
-     *
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\Exception
      * @throws \Throwable
      */
     public function generate(array $userGroups = [], int $count = 20, callable $cb = null): bool
@@ -70,7 +68,9 @@ class Users
                 $user->lastName = $faker->lastName();
                 $this->elements->saveElement($user);
                 $this->seeder->saveSeededUser($user);
-                $user->setScenario(Element::SCENARIO_LIVE);
+                $user->ruleset->useScenario(ElementRules::SCENARIO_LIVE);
+
+
                 $this->seeder->populateFields($user);
                 $this->elements->saveElement($user);
 

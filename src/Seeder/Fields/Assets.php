@@ -11,6 +11,7 @@
 
 namespace Anubarak\Seeder\Seeder\Fields;
 
+use Anubarak\Seeder\Seeder\Fields;
 use CraftCms\Cms\Asset\Elements\Asset;
 use Craftcms\Cms\Field\Assets as AssetsField;
 use CraftCms\Cms\Asset\Volumes;

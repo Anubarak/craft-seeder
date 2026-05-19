@@ -5,8 +5,8 @@ namespace Anubarak\Seeder\Listeners;
 
 use Anubarak\Seeder\Element\Actions\NumerizeAction;
 use Anubarak\Seeder\Element\Actions\PopulateAction;
-use CraftCms\Cms\Config\GeneralConfig;
 use Illuminate\Auth\AuthManager;
+use Illuminate\Support\Facades\App;
 
 /**
  * RegisterElementActions
@@ -18,7 +18,6 @@ use Illuminate\Auth\AuthManager;
 class RegisterElementActions
 {
     public function __construct(
-        private readonly GeneralConfig $config,
         private readonly AuthManager $auth
     )
     {
@@ -26,7 +25,7 @@ class RegisterElementActions
 
     public function handle(\CraftCms\Cms\Element\Events\ElementActionsResolving $event)
     {
-        if (!$this->config->devMode) {
+        if (!App::hasDebugModeEnabled()) {
             return;
         }
 

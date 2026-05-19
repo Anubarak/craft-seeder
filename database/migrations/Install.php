@@ -16,8 +16,8 @@ class Install extends Migration
 
     public function up(): bool
     {
-        if (!Schema::hasTable('seeder_entry')) {
-            Schema::create('seeder_entry', function (Blueprint $table) {
+        if (!Schema::hasTable('seeder_entries')) {
+            Schema::create('seeder_entries', function (Blueprint $table) {
                 $table->id();
                 $table->string('entryUid', 36);
                 $table->integer('section');

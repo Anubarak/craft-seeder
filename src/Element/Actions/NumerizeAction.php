@@ -3,6 +3,9 @@
 namespace Anubarak\Seeder\Element\Actions;
 
 
+use CraftCms\Cms\Support\Facades\HtmlStack;
+use function CraftCms\Cms\t;
+
 /**
  * Craft CMS Plugins
  *
@@ -17,22 +20,15 @@ namespace Anubarak\Seeder\Element\Actions;
  */
 class NumerizeAction extends \CraftCms\Cms\Element\Actions\ElementAction
 {
-    /**
-     * @inheritdoc
-     */
     public function getTriggerLabel(): string
     {
-        return \Craft::t('element-seeder', 'Numerize Element(s)');
+        return t('Numerize Element(s)', category: 'element-seeder');
     }
 
 
-
-    /**
-     * @inheritdoc
-     */
     public function getTriggerHtml(): ?string
     {
-        \Craft::$app->getView()->registerJsWithVars(function($actionClass) {
+        HtmlStack::jsWithVars(function($actionClass) {
             return <<<JS
 (() => {
   new Craft.ElementActionTrigger({
@@ -43,7 +39,7 @@ class NumerizeAction extends \CraftCms\Cms\Element\Actions\ElementAction
       const selectedIds = selectedItems.toArray().map((item) => {
         return parseInt($(item).data('id'));
       });
-       const slideOut = new Craft.CpScreenSlideout('element-seeder/seeder/numerize-content-modal', {
+       const slideOut = new Craft.CpScreenSlideout('element-seeder/numerize-content-modal', {
         showHeader: true,
         params: {
             elementIds: selectedIds

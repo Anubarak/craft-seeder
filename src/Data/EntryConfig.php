@@ -73,7 +73,6 @@ class EntryConfig extends ElementConfig
      * @param \CraftCms\Cms\Entry\Elements\Entry|\CraftCms\Cms\Element\Contracts\ElementInterface$element
      *
      * @return bool
-     * @throws \yii\base\InvalidConfigException
      * @author Robin Schambach
      * @since  20/12/2023
      */

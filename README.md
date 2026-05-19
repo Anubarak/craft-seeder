@@ -3,7 +3,7 @@
 ## Usage
 
 Seeder allows you to quickly create dummy entries through the command line. And you can just as easily remove the dummy data when you're done building the site.
-With the plugin installed, running `php craft element-seeder/generate/entries` create entries
+With the plugin installed, running `php artisan element-seeder:generate`
 
 ## Installation
 
@@ -19,13 +19,13 @@ To install the plugin, follow these instructions.
 
 3. In the Control Panel, go to Settings → Plugins and click the “Install” button for "Seeder".
 
-### Entries (Section ID/handle, count)
-
-Use the command below, followed by the ``--section`` option and the ``--count`` of entries you want to create (defaults to 20 if ommited). This command works with both section ID and handle. 
+### Generate Entries/Assets/Users
 
 ```Shell
-php craft element-seeder/generate/entries --section=news --count=15
+php artisan element-seeder:generate
 ```
+
+will guide you through the wizard.
 
 ## Clean up
 Once you're done building out the site, the plugin gives you an easy way to remove the dummy data (entries, assets, categories and users). This can be done through the CP (click the Seeder section the sidebar) or through the command line with the following command:
@@ -39,16 +39,13 @@ php craft element-seeder/clean-up
 you can include custom configurations for each layout
 
 ```php
-<?php
+use Anubarak\Seeder\Data\EntryConfig;
+use Anubarak\Seeder\Data\FieldCallback;
+use CraftCms\Cms\Element\Contracts\ElementInterface;
+use CraftCms\Cms\Field\Contracts\FieldInterface;
 
-use anubarak\seeder\models\EntryConfig;
-use anubarak\seeder\models\FieldCallback;
-use anubarak\seeder\models\Settings;
-use craft\base\ElementInterface;
-use craft\base\FieldInterface;
-
-$config = (new Settings())
-    ->fieldsConfig([
+return [
+    'fieldsConfig' => [
         new EntryConfig(
             'news',
             [
@@ -79,10 +76,8 @@ $config = (new Settings())
                     ->setFakerMethod('text'),
             ]
         )
-    ]);
-
-// required for Craft since they'll do an array_merge
-return $config->toArray([], ['fieldsConfig'], false);
+    ]
+];
 ```
 Would create a custom callback while seeding fields for entries in the section `news` for fields 
 `date`, `date2` and `text`. 
@@ -121,29 +116,28 @@ The same can be done with multiple elements via element index
 
 ### Register Field Type Event
 
-to include custom fields, you can use the `anubarak\seeder\events\RegisterFieldTypeEvent` event.
+to include custom fields, you can use the `\Anubarak\Seeder\Events\RegisterFieldTypeEvent` event.
 
 ```php
-\yii\base\Event::on(
-    \anubarak\seeder\services\SeederService::class,
-    \anubarak\seeder\services\SeederService::REGISTER_FIELD_TYPES,
-    static function(\anubarak\seeder\events\RegisterFieldTypeEvent $event){
-        $event->types['my\field\Class'] = MyCustomField::class;
-    }
-);
+\Illuminate\Support\Facades\Event::listen(
+    \Anubarak\Seeder\Events\RegisterFieldTypeEvent::class,
+    function(\Anubarak\Seeder\Events\RegisterFieldTypeEvent $event){
+    $event->types['my\field\Class'] = MyCustomField::class;
+});
+
 ```
 My Custom field could then look like the following
 ```php
-use craft\base\ElementInterface;
-use craft\base\FieldInterface;
-use anubarak\seeder\services\fields\BaseField
+use Anubarak\Seeder\SeederServiceProvider;
+use CraftCms\Cms\Element\Contracts\ElementInterface;
+use CraftCms\Cms\Field\Contracts\FieldInterface;
 
 class PlainText extends BaseField
 {
     /**
      * @inheritDoc
      */
-    public function generate(\craft\fields\PlainText|FieldInterface $field, ElementInterface $element = null)
+    public function generate(\CraftCms\Cms\Field\PlainText|FieldInterface $field, ElementInterface|null $element = null)
     {
         if(!$field->multiline){
             return $this->factory->text($field->charLimit ?: 200);
@@ -159,10 +153,9 @@ class PlainText extends BaseField
 To register a unique field that should be able to the unique matrix fields
 
 ```php
-\yii\base\Event::on(
-    \anubarak\seeder\services\UniqueFields::class,
-    \anubarak\seeder\services\UniqueFields::EVENT_REGISTER_UNIQUE_FIELDS,
-    static function(\anubarak\seeder\events\RegisterUniqueFieldEvent $event){
+\Illuminate\Support\Facades\Event::listen(
+    \Anubarak\Seeder\Events\RegisterUniqueFieldEvent::class,
+    static function(\Anubarak\Seeder\Events\RegisterUniqueFieldEvent $event){
         $event->fields[] = MyCustomUniqueField::class;
     }
 );
@@ -171,7 +164,7 @@ To register a unique field that should be able to the unique matrix fields
 class DropdownUniqueField implements UniqueFieldInterface
 {
     /**
-     * @param \craft\fields\BaseOptionsField $field
+     * @param \CraftCms\Cms\Field\BaseOptionsField $field
      *
      * @inheritDoc
      */

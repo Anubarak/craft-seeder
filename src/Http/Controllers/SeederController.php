@@ -10,9 +10,9 @@
 
 namespace Anubarak\Seeder\Http\Controllers;
 
-use Anubarak\Seeder\records\SeederAssetRecord;
-use Anubarak\Seeder\records\SeederEntryRecord;
-use Anubarak\Seeder\records\SeederUserRecord;
+use Anubarak\Seeder\Models\SeederAssetRecord;
+use Anubarak\Seeder\Models\SeederEntryRecord;
+use Anubarak\Seeder\Models\SeederUserRecord;
 use Anubarak\Seeder\Seeder\Seeder;
 use Anubarak\Seeder\Seeder\UniqueFields;
 use Anubarak\Seeder\Seeder\Weeder;
@@ -83,7 +83,7 @@ class SeederController
         }
 
 
-        return $this->view->renderTemplate('element-seeder/index', ['data' => $data]);
+        return $this->view->renderPageTemplate('element-seeder/index', ['data' => $data]);
     }
 
     /**
@@ -214,7 +214,7 @@ class SeederController
             ->contentTemplate('element-seeder/generateContent.twig', [
                 'elementIds' => $ids,
                 'layouts'  => $layouts,
-                'action' => 'element-seeder/seeder/generate-content',
+                'action' => 'element-seeder/generate-content',
             ]);
     }
 
@@ -381,7 +381,7 @@ class SeederController
             ->contentTemplate('element-seeder/generateContent.twig', [
                 'elementIds' => $ids,
                 'layouts'  => $layouts,
-                'action' => 'element-seeder/seeder/numerize-elements',
+                'action' => 'element-seeder/numerize-elements',
             ]);
     }
 
@@ -498,10 +498,9 @@ class SeederController
     {
         // we always use the same element type
         $class = DB::query()
-            ->select(['type'])
             ->from(Table::ELEMENTS)
             ->where('id', '=', $ids[0])
-            ->scalar();
+            ->value('type');
 
         $query = app(Elements::class)->createElementQuery($class);
 

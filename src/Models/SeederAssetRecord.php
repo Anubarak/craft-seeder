@@ -1,6 +1,6 @@
 <?php
 
-namespace Anubarak\Seeder\records;
+namespace Anubarak\Seeder\Models;
 
 use CraftCms\Cms\Shared\BaseModel;
 use CraftCms\Cms\Shared\Concerns\HasUid;
@@ -8,7 +8,7 @@ use CraftCms\Cms\Shared\Concerns\HasUid;
 /**
  * Class SeederAssetRecord
  *
- * @package Anubarak\Seeder\records
+ * @package Anubarak\Seeder\Models
  * @since   26.06.2024
  * @author  by Robin Schambach
  * @property string $assetUid

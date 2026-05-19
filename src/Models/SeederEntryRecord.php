@@ -1,6 +1,6 @@
 <?php
 
-namespace Anubarak\Seeder\records;
+namespace Anubarak\Seeder\Models;
 
 use CraftCms\Cms\Shared\BaseModel;
 use CraftCms\Cms\Shared\Concerns\HasUid;
@@ -8,7 +8,7 @@ use CraftCms\Cms\Shared\Concerns\HasUid;
 /**
  * Class SeederEntryRecord
  *
- * @package Anubarak\Seeder\records
+ * @package Anubarak\Seeder\Models
  * @since   19/12/2023
  * @author  by Robin Schambach
  *
@@ -19,5 +19,5 @@ class SeederEntryRecord extends BaseModel
 {
     use HasUid;
 
-    protected $table = 'seeder_entry';
+    protected $table = 'seeder_entries';
 }

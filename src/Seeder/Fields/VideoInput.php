@@ -139,7 +139,7 @@ class VideoInput extends BaseField
         return [
             'type'    => $type,
             'id'      => $this->factory->randomElement($videos[$type]),
-            'startAt' => '',
+            'startAt' => null,
         ];
     }
 }

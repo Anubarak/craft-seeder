@@ -11,7 +11,7 @@
 
 namespace Anubarak\Seeder\Seeder\Unique;
 
-use Anubarak\Seeder\Seeder\Fields\Fields;
+use Anubarak\Seeder\Seeder\Fields;
 use CraftCms\Cms\Field\Contracts\FieldInterface;
 use CraftCms\Cms\Field\PlainText;
 

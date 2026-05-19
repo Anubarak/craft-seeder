@@ -10,18 +10,32 @@
 
 namespace Anubarak\Seeder\Commands;
 
-use Anubarak\Seeder\services\Assets;
-use Anubarak\Seeder\services\Entries;
-use Anubarak\Seeder\services\Users;
-use craft\helpers\Console;
-use craft\models\EntryType;
-use craft\models\Section;
-use Craft;
-use craft\models\UserGroup;
+
+use Anubarak\Seeder\Seeder\Generators\Assets;
+use Anubarak\Seeder\Seeder\Generators\Entries;
+use Anubarak\Seeder\Seeder\Generators\Users;
+use CraftCms\Cms\Asset\Data\Volume;
+use CraftCms\Cms\Asset\Volumes;
+use CraftCms\Cms\Element\Elements;
+use CraftCms\Cms\Entry\Data\EntryType;
+use CraftCms\Cms\Entry\Elements\Entry;
+use CraftCms\Cms\Asset\Elements\Asset;
+use CraftCms\Cms\Entry\EntryTypes;
+use CraftCms\Cms\Section\Data\Section;
+use CraftCms\Cms\Section\Sections;
+use CraftCms\Cms\Site\Data\Site;
+use CraftCms\Cms\Site\Sites;
+use CraftCms\Cms\User\Data\UserGroup;
+use CraftCms\Cms\User\Elements\User;
+use CraftCms\Cms\User\UserGroups;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Collection;
-use yii\console\Controller;
-use yii\console\ExitCode;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\select;
 
 /**
  * Seeder for Craft CMS 3.x - by Studio Espresso
@@ -33,179 +47,123 @@ use yii\console\ExitCode;
  * @package   Seeder
  * @since     1.0.0
  */
-class Generate extends Command
+class Generate extends Command implements PromptsForMissingInput
 {
-    /**
-     * Section handle or id
-     * @var null|string|int $section
-     */
-    public null|string|int $section = null;
-    /**
-     * entry type handles
-     *
-     * @var string|null $type
-     */
-    public string|null $type = null;
-    /**
-     * @var string|int|null
-     */
-    public null|string|int $volume = null;
-    /**
-     * user group id or handle
-     *
-     * @var string|null $group
-     */
-    public null|string $group = null;
-    /**
-     * Number of entries to be seeded
-     * @var int|null $count
-     */
-    public int|null $count = null;
-    /**
-     * site handle or id
-     *
-     * @var string|null|int $site
-     */
-    public string|null|int $site = null;
-    // Public Methods
-    // =========================================================================
+    protected $signature   = 'element-seeder:generate 
+    {type : generate entries}
+    {count : The amount of elements to generate}
+    {site : What site should the elements be generated for?}
+    {volume? : What volume to use for assets}
+    {section? : What section to use for entries}
+    {entryTypes? : What entry types to use for entries}
+    {userGroups? : What user groups to use for users}
+    ';
+    protected $description = 'Seed Elements';
 
+    public function __construct(
+        private readonly Sites      $sites,
+        private readonly Sections   $sections,
+        private readonly Volumes    $volumes,
+        private readonly Elements   $elements,
+        private readonly EntryTypes $entryTypes,
+        private readonly UserGroups $userGroups,
+
+        // generators
+        private readonly Entries    $entries,
+        private readonly Assets     $assets,
+        private readonly Users      $users,
+    ) {
+        parent::__construct();
+    }
 
     /**
-     * @inheritdoc
+     * @return int
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Throwable
+     * @author Robin Schambach
+     * @since  18.05.26
      */
-    public function options($actionId)
+    public function handle(): int
     {
-        switch ($actionId) {
-            case 'entries':
-                return ['section', 'count', 'site', 'type'];
-            case 'users':
-                return ['group', 'count'];
+        switch ($this->argument('type')) {
             case 'assets':
-                return ['volume', 'count'];
+                return $this->assets();
+                break;
+            case 'entries':
+                return $this->entries();
+                break;
+            case 'users':
+                return $this->users();
+                break;
+            default:
+                throw new InvalidArgumentException('Invalid type provided: ' . $this->argument('type'));
         }
     }
 
     /**
      * Generates entries for the specified section
-     *
-     * The first line of this method docblock is displayed as the description
-     * of the Console Command in ./craft help
-     *
-     * @return int
-     * @throws \craft\errors\SiteNotFoundException
      */
-    public function actionEntries(Entries $entries): int
+    public function entries(): int
     {
-        if (!$this->section) {
-            $options = [];
-            foreach (Craft::$app->getEntries()->getAllSections() as $section) {
-                if ($section->type !== Section::TYPE_SINGLE) {
-                    $options[$section->handle] = $section->name;
-                }
-            }
-
-            $this->section = $this->select('Which section?', $options);
-        }
-
-        if (ctype_digit($this->section)) {
-            $section = Craft::$app->getEntries()->getSectionById((int) $this->section);
-        } else {
-            $section = Craft::$app->getEntries()->getSectionByHandle($this->section);
-        }
+        $count = $this->argument('count');
+        $section = $this->sections->getSectionByHandle($this->argument('section'));
 
         if (!$section) {
-            $this->stderr('No section found with „' . $this->section . '“' . PHP_EOL);
+            $this->error('No section found with „' . $this->argument('section') . '“' . PHP_EOL);
 
-            return ExitCode::OK;
+            return self::FAILURE;
         }
 
-        $entryTypes = [];
-        if ($this->type === null) {
-            $types = Collection::make($section->getEntryTypes());
-            $handles = $types
-                ->map(fn(EntryType $type) => $type->handle)
-                ->all();
-            $selected = $this->multiSelect('Which entry type?', $handles);
-            $entryTypes = $types
-                ->filter(fn(EntryType $type) => in_array($type->handle, $selected, true))
+        $types = $this->argument('entryTypes');
+        if (empty($types) || in_array('all', $types, true)) {
+            $entryTypes = $section->getEntryTypes();
+        } else {
+            $entryTypes = (new Collection())
+                ->map(fn(string $handle) => $this->entryTypes->getEntryTypeByHandle($handle))
                 ->all();
         }
 
+        $site = $this->sites->getSiteByHandle($this->argument('site'));
 
-        $site = null;
-        if ($this->site) {
-            if (ctype_digit($this->site)) {
-                $site = Craft::$app->getSites()->getSiteById((int) $this->site);
-            } else {
-                $site = Craft::$app->getSites()->getSiteByHandle($this->site);
-            }
-        }
 
-        // fallback nothing set -> use default
-        if ($site === null) {
-            $site = Craft::$app->getSites()->getPrimarySite();
-        }
-
-        $this->ensureCount();
-
-        Console::startProgress(0, $this->count);
-        $entries->generate(
+        $bar = $this->output->createProgressBar($count * count($entryTypes));
+        $this->entries->generate(
             $site,
             $section,
             $entryTypes,
-            $this->count,
-            function($done, $max) {
-                Console::updateProgress($done, $max);
-            }
+            $count,
+            fn() => $bar->advance()
         );
-        Console::endProgress();
+        $bar->finish();
+        $this->newLine();
+        $this->info("Successfully generated {$count} entries");
 
-        return ExitCode::OK;
+        return self::SUCCESS;
     }
 
     /**
-     * Generates users for the specified usergroup
-     *
-     * @param \Anubarak\Seeder\services\Users $users
-     *
+     * Generates users for the specified groups
      * @return int
      * @throws \Throwable
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\Exception
      */
-    public function actionUsers(Users $users): int
+    public function users(): int
     {
-        if (Craft::$app->getEdition() !== Craft::Pro) {
-            echo "Users requires your Craft install to be upgrade to Pro. You can trial Craft Pro in the control panel\n";
+        $groups = (new Collection($this->argument('userGroups')))
+            ->map(fn(string $group) => $this->userGroups->getGroupByHandle($group))
+            ->all();
 
-            return ExitCode::CONFIG;
-        }
+        $count = $this->argument('count');
+        $bar = $this->output->createProgressBar($count);
+        $this->users->generate(
+            $groups,
+            $count,
+            fn() => $bar->advance()
+        );
+        $bar->finish();
+        $this->newLine();
+        $this->info("Successfully generated {$count} users");
 
-        $groups = [];
-        $userGroups = Collection::make(Craft::$app->getUserGroups()->getAllGroups());
-        if ($this->group === null && $userGroups->count()) {
-            $handles = $userGroups->map(fn(UserGroup $option) => $option->handle)->all();
-            $selected = $this->multiSelect('Which user groups?', $handles, []);
-            $groups = $userGroups
-                ->filter(fn(UserGroup $type) => in_array($type->handle, $selected, true))
-                ->all();
-        } elseif ($this->group && $userGroups->count()) {
-            $selected = explode(',', $this->group);
-            $groups = $userGroups
-                ->filter(fn(UserGroup $type) => in_array($type->handle, $selected, true))
-                ->all();
-        }
-
-        $this->ensureCount();
-
-        Console::startProgress(0, $this->count);
-        $users->generate($groups, $this->count, function($done, $max) {
-            Console::updateProgress($done, $max);
-        });
-        Console::endProgress();
-
-        return ExitCode::OK;
+        return self::SUCCESS;
     }
 
     /**
@@ -216,110 +174,121 @@ class Generate extends Command
      * @return int
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Throwable
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\ErrorException
-     * @throws \yii\base\Exception
      * @author Robin Schambach
      * @since  25.06.2024
      */
-    public function actionAssets(Assets $assets): int
+    public function assets(): int
     {
-        if (!$this->volume) {
-            $options = [];
-            foreach (Craft::$app->getVolumes()->getAllVolumes() as $object) {
-                $options[$object->handle] = $object->name;
-            }
+        $volume = $this->volumes->getVolumeByHandle($this->argument('volume'));
+        $count = $this->argument('count');
 
-            $this->volume = $this->select('Which Volume?', $options);
-        }
+        $bar = $this->output->createProgressBar($count);
+        $this->assets->generate(
+            $volume,
+            $count,
+            fn() => $bar->advance()
+        );
+        $bar->finish();
+        $this->newLine();
+        $this->info("Successfully generated {$count} assets");
 
-        if (ctype_digit($this->volume)) {
-            $volume = Craft::$app->getVolumes()->getVolumeById((int) $this->volume);
-        } else {
-            $volume = Craft::$app->getVolumes()->getVolumeByHandle($this->volume);
-        }
-
-        $this->ensureCount(50);
-
-        Console::startProgress(0, $this->count);
-        $assets->generate($volume, $this->count, function($done, $max) {
-            Console::updateProgress($done, $max);
-        });
-        Console::endProgress();
-
-        return ExitCode::OK;
+        return self::SUCCESS;
     }
 
     /**
-     * ensureCount
-     *
-     * @author Robin Schambach
-     * @since  25.06.2024
+     * @inheritdoc
      */
-    protected function ensureCount(int $max = null): void
+    protected function afterPromptingForMissingArguments(InputInterface $input, OutputInterface $output): void
     {
-        if ($this->count === null) {
-            $config = ['default' => 20];
-            $message = 'How many would you like to create';
-            if ($max) {
-                $message .= ' (max:  ' . $max . ')';
-                $config['validator'] = function($input, &$error) use ($max) {
-                    if ((int) ($input) > $max) {
-                        $error = 'Must be less than ' . $max;
+        // If they chose Asset, and didn't provide a volume parameter manually in CLI
+        if ($input->getArgument('type') === 'assets' && !$input->getArgument('volume')) {
+            $volume = select(
+                label: 'What volume to use for assets?',
+                options: $this->volumes->getAllVolumes()
+                    ->mapWithKeys(fn(Volume $volume) => [$volume->handle => $volume->name])
+                    ->all()
+            );
 
-                        return false;
-                    }
+            // Manually bind it back to the command input
+            $input->setArgument('volume', $volume);
+        }
 
-                    return true;
-                };
+        // If they chose Entry instead
+        if ($input->getArgument('type') === 'entries' && !$input->getArgument('section')) {
+            $section = select(
+                label: 'What section to use for entries?',
+                options: $this->sections->getAllSections()
+                    ->mapWithKeys(fn(Section $section) => [$section->handle => $section->name])
+                    ->all()
+            );
+
+            $input->setArgument('section', $section);
+
+            if (!$input->getArgument('entryTypes')) {
+                $sectionModel = $this->sections->getSectionByHandle($section);
+
+
+                $availableTypes = (new Collection($sectionModel->getEntryTypes()))
+                    ->mapWithKeys(fn(EntryType $entryType) => [$entryType->handle => $entryType->name])
+                    ->all();
+
+                if (count($availableTypes) > 1) {
+
+                    $entryTypes = multiselect(
+                        label: 'What entry types',
+                        options: [
+                            'all' => 'All',
+                            ...$availableTypes
+                        ]
+                    );
+                    $input->setArgument('entryTypes', $entryTypes);
+                } else {
+                    $input->setArgument('entryTypes', array_keys($availableTypes));
+                }
             }
-            $this->count = $this->prompt($message, $config);
-        } else {
-            if ($max !== null && $this->count > $max) {
-                $this->count = null;
-                $this->ensureCount($max);
+        }
+
+
+        if ($input->getArgument('type') === 'users' && !$input->getArgument('userGroups')) {
+
+            $allGroups = $this->userGroups->getAllGroups();
+            if($allGroups->count()){
+                $userGroups = multiselect(
+                    label: 'Groups to use?',
+                    options: $this->userGroups->getAllGroups()
+                        ->mapWithKeys(fn(UserGroup $group) => [$group->handle => $group->name])
+                        ->all()
+                );
+            } else {
+                $userGroups = [];
             }
+
+            // Manually bind it back to the command input
+            $input->setArgument('userGroups', $userGroups);
         }
     }
 
     /**
-     * multiSelect
-     *
-     * @param string       $message
-     * @param array        $options
-     * @param string|array $defaultValue
-     *
-     * @return array
-     * @author Robin Schambach
-     * @since  26.06.2024
+     * @inheritdoc
      */
-    protected function multiSelect(string $message, array $options, string|array $defaultValue = null): array
+    protected function promptForMissingArgumentsUsing(): array
     {
-        $this->stdout($message . PHP_EOL);
-
-        foreach ($options as $option) {
-            Console::stdout(' - ' . $option . PHP_EOL);
-        }
-
-        $selectedTypes = $this->prompt('select comma separated', [
-            'default'   => $defaultValue === null ? implode(',', $options) : $defaultValue,
-            'validator' => function($input, &$error) use ($options) {
-                $types = explode(',', $input);
-                if (empty($types)) {
-                    return true;
-                }
-
-                $error = '';
-                foreach ($types as $type) {
-                    if (!in_array($type, $options, true)) {
-                        $error = 'No option found with „' . $type . '“';
-                    }
-                }
-
-                return !$error;
-            }
-        ]);
-
-        return is_string($selectedTypes) ? explode(',', $selectedTypes) : $selectedTypes;
+        return [
+            'type'  => fn() => select(
+                label: 'Search for a user:',
+                options: [
+                    'entries' => Entry::displayName(),
+                    'assets'  => Asset::displayName(),
+                    'users'  => User::displayName(),
+                ],
+            ),
+            'site'  => fn() => select(
+                label: 'In what Site?:',
+                options: $this->sites->getAllSites()
+                    ->mapWithKeys(fn(Site $site) => [$site->handle => $site->getName()])
+                    ->all()
+            ),
+            'count' => fn() => $this->ask('How many elements to generate?', 20),
+        ];
     }
 }
