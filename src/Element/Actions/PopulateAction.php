@@ -5,6 +5,7 @@ namespace Anubarak\Seeder\Element\Actions;
 
 use CraftCms\Cms\Element\Actions\ElementAction;
 use CraftCms\Cms\Support\Facades\HtmlStack;
+use function CraftCms\Cms\t;
 
 /**
  * Craft CMS Plugins
@@ -25,7 +26,7 @@ class PopulateAction extends ElementAction
      */
     public function getTriggerLabel(): string
     {
-        return \Craft::t('element-seeder', 'Populate Element(s)');
+        return t('Populate Element(s)', category: 'element-seeder');
     }
 
     /**
