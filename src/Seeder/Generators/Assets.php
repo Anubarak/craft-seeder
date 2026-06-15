@@ -15,6 +15,7 @@ use Anubarak\Seeder\Seeder\Seeder;
 use CraftCms\Cms\Asset\Data\Volume;
 use CraftCms\Cms\Asset\Elements\Asset;
 use CraftCms\Cms\Asset\Folders;
+use CraftCms\Cms\Asset\Validation\AssetRules;
 use CraftCms\Cms\Element\Elements;
 use CraftCms\Cms\Element\Exceptions\ElementException;
 use CraftCms\Cms\Support\File;
@@ -80,7 +81,7 @@ readonly class Assets
             $asset->newFolderId = $folder->id;
             $asset->setVolumeId($folder->volumeId);
             $asset->avoidFilenameConflicts = true;
-            $asset->setScenario(Asset::SCENARIO_CREATE);
+            $asset->ruleset->useScenario(AssetRules::SCENARIO_CREATE);
 
             if (!$this->elements->saveElement($asset)) {
                 throw new ElementException(

@@ -49,6 +49,7 @@ use Illuminate\Database\DatabaseManager;
 use Illuminate\Log\LogManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use Secondred\Base\Video\Field\VideoInputField;
 use Throwable;
 use function in_array;
@@ -348,6 +349,8 @@ class Seeder
                         $hasCustomField = true;
                     }
                 }
+
+                Log::error("save {$entry->id} with {$entry->title}", [__METHOD__]);
 
                 $this->elements->saveElement($entry, false, saveContent: $hasCustomField);
             }
