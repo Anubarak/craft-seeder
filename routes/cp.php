@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:craft', 'craft.web'])->group(function() {
+Route::middleware(['craft.web'])->group(function() {
     Route::get(
         'element-seeder',
         [\Anubarak\Seeder\Http\Controllers\SeederController::class, 'index']

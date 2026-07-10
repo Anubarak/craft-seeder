@@ -29,7 +29,7 @@ use CraftCms\Cms\FieldLayout\LayoutElements\TitleField;
 use CraftCms\Cms\Http\RespondsWithFlash;
 use CraftCms\Cms\Http\Responses\CpScreenResponse;
 use CraftCms\Cms\Section\Sections;
-use CraftCms\Cms\Twig\TemplateRenderer;
+use CraftCms\Cms\View\TemplateRenderer;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
