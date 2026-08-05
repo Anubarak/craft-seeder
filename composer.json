@@ -25,12 +25,7 @@
   "extra": {
     "name": "Element Seeder",
     "handle": "element-seeder",
-    "class": "Anubarak\\Seeder\\SeederServiceProvider",
-    "laravel": {
-      "providers": [
-        "Anubarak\\Seeder\\SeederServiceProvider"
-      ]
-    }
+    "class": "Anubarak\\Seeder\\SeederServiceProvider"
   },
   "config": {
     "allow-plugins": {
