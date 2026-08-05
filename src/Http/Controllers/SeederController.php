@@ -29,7 +29,7 @@ use CraftCms\Cms\FieldLayout\LayoutElements\TitleField;
 use CraftCms\Cms\Http\RespondsWithFlash;
 use CraftCms\Cms\Http\Responses\CpScreenResponse;
 use CraftCms\Cms\Section\Sections;
-use CraftCms\Cms\View\TemplateRenderer;
+use CraftCms\Cms\View\TemplateManager;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +45,7 @@ class SeederController
     use RespondsWithFlash;
 
     public function __construct(
-        private readonly TemplateRenderer $view,
+        private readonly TemplateManager $view,
         private readonly Sections $sections,
         private readonly Request $request,
         private readonly Seeder $seeder,
