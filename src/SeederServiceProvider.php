@@ -5,10 +5,8 @@ namespace Anubarak\Seeder;
 
 use Anubarak\Seeder\Commands\CleanUp;
 use Anubarak\Seeder\Commands\Generate;
-use Anubarak\Seeder\Commands\Populate;
 use Anubarak\Seeder\Listeners\MetaFieldHtml;
 use Anubarak\Seeder\Listeners\RegisterElementActions;
-use Craft;
 use CraftCms\Cms\Element\Events\ElementActionsResolving;
 use CraftCms\Cms\Element\Events\ElementMetaFieldsHtmlResolving;
 use CraftCms\Cms\Plugin\Plugin;
